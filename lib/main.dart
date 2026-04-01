@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
@@ -30,6 +31,10 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
   });
 }
 
+@pragma('vm:entry-point')
+Future<void> _firebaseBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+}
 void main() async {
   runZonedGuarded(() async {
     WidgetsFlutterBinding.ensureInitialized();
@@ -37,6 +42,11 @@ void main() async {
 
     try {
       await Firebase.initializeApp();
+      // Initialize FCM
+      final fcm = FirebaseMessaging.instance;
+      await fcm.requestPermission();
+      await fcm.subscribeToTopic("all");
+      FirebaseMessaging.onBackgroundMessage(_firebaseBackgroundHandler);
 
 
       await ThemeService.instance.loadTheme();
