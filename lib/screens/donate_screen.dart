@@ -79,9 +79,6 @@ class _DonateScreenState extends State<DonateScreen> {
     }
   }
 
-      );
-    }
-  }
 
   Future<void> _showAmountDialog() async {
     return showDialog<void>(
