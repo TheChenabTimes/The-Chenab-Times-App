@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 
@@ -47,6 +49,34 @@ class _DonateScreenState extends State<DonateScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text("EXTERNAL_WALLET: ${response.walletName!}")),
     );
+  }
+  void _openCheckout(int amount) async {
+    if (amount == 0) return;
+    try {
+      final response = await http.post(
+        Uri.parse("https://api.thechenabtimes.com/payment.php"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"amount": amount, "currency": "INR"}),
+      );
+      final data = jsonDecode(response.body);
+      final orderId = data["id"];
+      var options = {
+        "key": "rzp_live_SXocvdfq7NW63I",
+        "amount": amount * 100,
+        "order_id": orderId,
+        "name": "The Chenab Times",
+        "description": "Donation",
+        "prefill": {"contact": "", "email": ""},
+      };
+      _razorpay.open(options);
+    } catch (e) {
+      debugPrint("Error: ${e.toString()}");
+      _showStatusDialog(
+        isSuccess: false,
+        title: "Error",
+        message: "An unexpected error occurred. Please try again later.",
+      );
+    }
   }
 
   void _openCheckout(int amount) {
