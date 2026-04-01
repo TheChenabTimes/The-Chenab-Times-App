@@ -47,24 +47,55 @@ void main() async {
       // FCM Foreground Handler
       FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
         final notification = message.notification;
+        final data = message.data;
         if (notification != null) {
           final model = NotificationModel(
             notificationId: message.messageId ?? DateTime.now().toString(),
             title: notification.title ?? "The Chenab Times",
             body: notification.body ?? "",
-            imageUrl: null,
+            imageUrl: data["image"],
             receivedAt: DateTime.now(),
             article: null,
-            postId: null,
+            postId: int.tryParse(data["post_id"] ?? ""),
           );
           await notificationProvider.addNotification(model);
         }
       });
       // FCM Click Handler
-      FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) async {
+        final data = message.data;
+        final postId = int.tryParse(data["post_id"] ?? "");
+        if (postId != null) {
+          Article? article = await RssService().fetchArticleById(postId);
+          if (article != null) {
+            navigatorKey.currentState?.push(
+              MaterialPageRoute(
+                builder: (_) => ArticleScreen(articles: [article], initialIndex: 0),
+              ),
+            );
+            return;
+          }
+        }
         navigatorKey.currentState?.push(
           MaterialPageRoute(builder: (_) => const NotificationScreen()),
         );
+      });
+        final postId = int.tryParse(data["post_id"] ?? "");
+        if (postId != null) {
+          Article? article = await RssService().fetchArticleById(postId);
+          if (article != null) {
+            navigatorKey.currentState?.push(
+              MaterialPageRoute(
+                builder: (_) => ArticleScreen(articles: [article], initialIndex: 0),
+              ),
+            );
+            return;
+          }
+        }
+        navigatorKey.currentState?.push(
+          MaterialPageRoute(builder: (_) => const NotificationScreen()),
+        );
+      });
       });
 
 
