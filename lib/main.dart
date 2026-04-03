@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:typed_data';
+import 'package:http/http.dart' as http;
 import 'dart:developer';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -71,6 +73,31 @@ void main() async {
             postId: int.tryParse(data["post_id"] ?? ""),
           );
           await notificationProvider.addNotification(model);
+          // Show rich notification with image
+          final imageUrl = data["image"] ?? "";
+          BigPictureStyleInformation? bigPictureStyle;
+          if (imageUrl.isNotEmpty) {
+            final http.Response response = await http.get(Uri.parse(imageUrl));
+            final Uint8List imageBytes = response.bodyBytes;
+            bigPictureStyle = BigPictureStyleInformation(
+              ByteArrayAndroidBitmap(imageBytes),
+              largeIcon: ByteArrayAndroidBitmap(imageBytes),
+            );
+          }
+          await flutterLocalNotificationsPlugin.show(
+            notification.hashCode,
+            notification.title,
+            notification.body,
+            NotificationDetails(
+              android: AndroidNotificationDetails(
+                "high_importance_channel",
+                "High Importance Notifications",
+                importance: Importance.high,
+                priority: Priority.high,
+                styleInformation: bigPictureStyle,
+              ),
+            ),
+          );
         }
       });
       // FCM Click Handler
