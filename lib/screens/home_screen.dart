@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 import 'package:the_chenab_times/widgets/article_list_tab.dart';
 import 'package:the_chenab_times/widgets/category_news_tab.dart';
 
@@ -60,13 +61,19 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   @override
   void initState() {
     super.initState();
+    // Auto refresh every 5 minutes
+    _refreshTimer = Timer.periodic(const Duration(minutes: 5), (timer) {
+      setState(() {});
+    });
     // Initialize the tab controller.
     _tabController = TabController(length: _tabs.length, vsync: this);
+  Timer? _refreshTimer;
   }
 
   @override
   void dispose() {
     _tabController.dispose();
+    _refreshTimer?.cancel();
     super.dispose();
   }
 
