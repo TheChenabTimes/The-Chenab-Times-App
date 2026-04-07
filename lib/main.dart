@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import 'dart:developer';
 import 'package:firebase_core/firebase_core.dart';
+import 'services/summarization_service.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter/material.dart';
@@ -156,6 +157,21 @@ void main() async {
       await ThemeService.instance.loadTheme();
       await LanguageService.instance.init();
       await notificationProvider.loadNotifications(); // Load initial notifications
+      // Background pre-fetch summaries
+      Future.delayed(const Duration(seconds: 3), () async {
+        try {
+          final articles = await RssService().fetchArticles();
+          for (final article in articles.take(10)) {
+            await SummarizationService.instance.summarizeArticle(
+              article.content ?? article.excerpt ?? "",
+              articleLink: article.link,
+            );
+            await Future.delayed(const Duration(seconds: 2));
+          }
+        } catch (e) {
+          debugPrint("Prefetch error: $e");
+        }
+      });
     } catch (e) {
       debugPrint("Initialization error: $e");
     }

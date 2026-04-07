@@ -85,7 +85,7 @@ class _ArticleScreenState extends State<ArticleScreen> {
     );
 
     try {
-      final summary = await SummarizationService.instance.summarizeArticle(_currentArticle.content ?? _currentArticle.excerpt ?? '');
+      final summary = await SummarizationService.instance.summarizeArticle(_currentArticle.content ?? _currentArticle.excerpt ?? '', articleLink: _currentArticle.link);
       Uint8List? imageBytes;
       if (_currentArticle.imageUrl != null) {
         try {
@@ -194,7 +194,7 @@ class __ArticlePageState extends State<_ArticlePage> {
     setState(() { _isLoadingSummary = true; _summaryError = false; });
     try {
       final text = widget.article.content ?? widget.article.excerpt ?? '';
-      final summary = await SummarizationService.instance.summarizeArticle(text);
+      final summary = await SummarizationService.instance.summarizeArticle(text, articleLink: widget.article.link);
       if (mounted) setState(() { _summary = summary; _isLoadingSummary = false; });
     } catch (e) {
       if (mounted) setState(() { _summaryError = true; _isLoadingSummary = false; });

@@ -20,7 +20,7 @@ class DatabaseService {
   Future<Database> _initDB() async {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, 'the_chenab_times.db');
-    return await openDatabase(path, version: 5, onCreate: _onCreate, onUpgrade: _onUpgrade);
+    return await openDatabase(path, version: 6, onCreate: _onCreate, onUpgrade: _onUpgrade);
   }
 
   Future<void> _onCreate(Database db, int version) async {
@@ -52,6 +52,9 @@ class DatabaseService {
     if (oldVersion < 5) {
       await _createNotificationsTable(db);
     }
+    if (oldVersion < 6) {
+      await db.execute('CREATE TABLE IF NOT EXISTS summary_cache(id INTEGER PRIMARY KEY AUTOINCREMENT, article_link TEXT NOT NULL UNIQUE, summary TEXT NOT NULL, cached_at INTEGER NOT NULL)');
+    }
   }
 
   Future<void> _createTables(Database db) async {
@@ -81,6 +84,7 @@ class DatabaseService {
     )
     ''');
     await _createNotificationsTable(db);
+    await db.execute('CREATE TABLE IF NOT EXISTS summary_cache(id INTEGER PRIMARY KEY AUTOINCREMENT, article_link TEXT NOT NULL UNIQUE, summary TEXT NOT NULL, cached_at INTEGER NOT NULL)');
   }
 
   Future<void> _createNotificationsTable(Database db) async {
@@ -166,5 +170,21 @@ class DatabaseService {
   Future<void> deleteNotification(int id) async {
     final db = await database;
     await db.delete('notifications', where: 'id = ?', whereArgs: [id]);
+  }
+  // Summary Cache Methods
+  Future<String?> getCachedSummary(String articleLink) async {
+    final db = await database;
+    final maps = await db.query("summary_cache", where: "article_link = ?", whereArgs: [articleLink]);
+    if (maps.isNotEmpty) return maps.first["summary"] as String?;
+    return null;
+  }
+  Future<void> cacheSummary(String articleLink, String summary) async {
+    final db = await database;
+    await db.insert("summary_cache", {"article_link": articleLink, "summary": summary, "cached_at": DateTime.now().millisecondsSinceEpoch}, conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+  Future<void> clearOldSummaryCache() async {
+    final db = await database;
+    final cutoff = DateTime.now().subtract(const Duration(days: 7)).millisecondsSinceEpoch;
+    await db.delete("summary_cache", where: "cached_at < ?", whereArgs: [cutoff]);
   }
 }
