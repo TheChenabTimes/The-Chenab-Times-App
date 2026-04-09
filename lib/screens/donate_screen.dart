@@ -11,8 +11,14 @@ class DonateScreen extends StatefulWidget {
 }
 
 class _DonateScreenState extends State<DonateScreen> {
+  static const String _createOrderUrl = 'https://api.thechenabtimes.com/payment.php';
+  static const String _verifyPaymentUrl =
+      'https://api.thechenabtimes.com/payment_verify.php';
+
   final _razorpay = Razorpay();
   final _amountController = TextEditingController();
+  String? _pendingOrderId;
+  int? _pendingAmount;
 
   @override
   void initState() {
@@ -30,11 +36,7 @@ class _DonateScreenState extends State<DonateScreen> {
   }
 
   void _handlePaymentSuccess(PaymentSuccessResponse response) {
-    _showStatusDialog(
-      isSuccess: true,
-      title: 'Payment Successful',
-      message: 'Thank you for your generous donation. Your support helps us continue our work.',
-    );
+    _verifyPayment(response);
   }
 
   void _handlePaymentError(PaymentFailureResponse response) {
@@ -50,16 +52,92 @@ class _DonateScreenState extends State<DonateScreen> {
       SnackBar(content: Text("EXTERNAL_WALLET: ${response.walletName!}")),
     );
   }
+  Future<void> _verifyPayment(PaymentSuccessResponse response) async {
+    final orderId = response.orderId ?? _pendingOrderId;
+    final paymentId = response.paymentId;
+    final signature = response.signature;
+
+    if (orderId == null || paymentId == null || signature == null) {
+      _showStatusDialog(
+        isSuccess: false,
+        title: 'Verification Failed',
+        message: 'We could not verify your donation. Please contact support if money was deducted.',
+      );
+      return;
+    }
+
+    try {
+      final verifyResponse = await http
+          .post(
+            Uri.parse(_verifyPaymentUrl),
+            headers: {"Content-Type": "application/json"},
+            body: jsonEncode({
+              "order_id": orderId,
+              "payment_id": paymentId,
+              "signature": signature,
+              "amount": _pendingAmount,
+              "currency": "INR",
+            }),
+          )
+          .timeout(const Duration(seconds: 20));
+
+      final Map<String, dynamic> data = jsonDecode(verifyResponse.body);
+      final isVerified = verifyResponse.statusCode == 200 &&
+          (data["verified"] == true ||
+              data["success"] == true ||
+              data["status"] == "verified" ||
+              data["status"] == "success");
+
+      if (!mounted) return;
+
+      if (isVerified) {
+        _pendingOrderId = null;
+        _pendingAmount = null;
+        _showStatusDialog(
+          isSuccess: true,
+          title: 'Payment Successful',
+          message:
+              'Thank you for your generous donation. Your support helps us continue our work.',
+        );
+        return;
+      }
+
+      _showStatusDialog(
+        isSuccess: false,
+        title: 'Verification Failed',
+        message: data["message"]?.toString() ??
+            'Your payment could not be verified. Please contact support if money was deducted.',
+      );
+    } catch (e) {
+      if (!mounted) return;
+      _showStatusDialog(
+        isSuccess: false,
+        title: 'Verification Failed',
+        message:
+            'We could not verify your donation right now. Please contact support if money was deducted.',
+      );
+    }
+  }
+
   void _openCheckout(int amount) async {
     if (amount == 0) return;
     try {
-      final response = await http.post(
-        Uri.parse("https://api.thechenabtimes.com/payment.php"),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({"amount": amount, "currency": "INR"}),
-      );
-      final data = jsonDecode(response.body);
+      final response = await http
+          .post(
+            Uri.parse(_createOrderUrl),
+            headers: {"Content-Type": "application/json"},
+            body: jsonEncode({"amount": amount, "currency": "INR"}),
+          )
+          .timeout(const Duration(seconds: 20));
+      final Map<String, dynamic> data = jsonDecode(response.body);
       final orderId = data["id"];
+      if (response.statusCode != 200 || orderId == null) {
+        throw Exception(data["message"] ?? "Failed to create donation order.");
+      }
+
+      _pendingOrderId = orderId.toString();
+      _pendingAmount = amount;
+
       var options = {
         "key": "rzp_live_SXocvdfq7NW63I",
         "amount": amount * 100,
