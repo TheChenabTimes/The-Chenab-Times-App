@@ -37,10 +37,15 @@ class RssService {
     int page = 1,
     int perPage = 15,
     String? languageCode,
+    DateTime? after,
   }) async {
     var url = '$postsBaseUrl?page=$page&per_page=$perPage&_embed=true';
     if (languageCode != null && languageCode != 'en') {
       url += '&lang=$languageCode';
+    }
+    if (after != null) {
+      url +=
+          '&after=${Uri.encodeQueryComponent(after.toUtc().toIso8601String())}';
     }
     final uri = Uri.parse(url);
     try {
@@ -67,11 +72,16 @@ class RssService {
     int page = 1,
     int perPage = 15,
     String? languageCode,
+    DateTime? after,
   }) async {
     var url =
         '$postsBaseUrl?categories=$categoryId&page=$page&per_page=$perPage&_embed=true';
     if (languageCode != null && languageCode != 'en') {
       url += '&lang=$languageCode';
+    }
+    if (after != null) {
+      url +=
+          '&after=${Uri.encodeQueryComponent(after.toUtc().toIso8601String())}';
     }
     final uri = Uri.parse(url);
     try {

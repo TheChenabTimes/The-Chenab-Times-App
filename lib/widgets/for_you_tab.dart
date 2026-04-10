@@ -38,28 +38,16 @@ class _ForYouTabState extends State<ForYouTab> {
   Timer? _heroTimer;
   Timer? _tickerTimer;
   bool _boundDependencies = false;
-  int? _activeRegionCategoryId;
 
-  int _page = 1;
   int _heroIndex = 0;
   int _tickerIndex = 0;
   bool _loading = true;
-  bool _hasMore = true;
   bool _hasError = false;
   String _errorMessage = '';
 
   @override
   void initState() {
     super.initState();
-    _scrollController.addListener(() {
-      if (_scrollController.position.pixels >
-              _scrollController.position.maxScrollExtent - 300 &&
-          !_loading &&
-          _hasMore &&
-          !_hasError) {
-        _fetchPage();
-      }
-    });
   }
 
   @override
@@ -90,7 +78,7 @@ class _ForYouTabState extends State<ForYouTab> {
     _refresh();
   }
 
-  Future<int?> _resolveRegionCategoryId() async {
+  Future<int?> _resolvePrimaryRegionCategoryId() async {
     final location = _locationService;
     if (location == null) return null;
 
@@ -140,45 +128,29 @@ class _ForYouTabState extends State<ForYouTab> {
     if (mounted) setState(() => _loading = true);
 
     try {
-      if (isInitial || _activeRegionCategoryId == null) {
-        _activeRegionCategoryId = await _resolveRegionCategoryId();
-      }
-
-      final pageItems = _activeRegionCategoryId != null
-          ? await _rss.fetchCategoryPosts(
-              categoryId: _activeRegionCategoryId!,
-              page: _page,
-              perPage: 18,
-              languageCode: _languageService.appLocale.languageCode,
-            )
-          : await _rss.fetchPostsPage(
-              page: _page,
-              perPage: 18,
-              languageCode: _languageService.appLocale.languageCode,
-            );
+      final pageItems = await _buildForYouFeed();
 
       if (pageItems.isEmpty) {
-        if (_activeRegionCategoryId != null && isInitial) {
-          _activeRegionCategoryId = null;
-          await _fetchPage(isInitial: true);
-          return;
+        if (mounted) {
+          setState(() {
+            _items.clear();
+            _hasError = true;
+            _errorMessage =
+                'No recent posts were found for your region right now.';
+          });
         }
-        if (mounted) setState(() => _hasMore = false);
       } else {
         if (mounted) {
           setState(() {
-            if (isInitial) _items.clear();
+            _items.clear();
             _items.addAll(pageItems);
-            _page++;
             _hasError = false;
           });
           _setupAutoPlay();
-          if (_page == 2) {
-            AppStatusHandler.showStatusToast(
-              message: 'Personalized feed loaded.',
-              type: StatusType.success,
-            );
-          }
+          AppStatusHandler.showStatusToast(
+            message: 'Personalized feed loaded.',
+            type: StatusType.success,
+          );
         }
       }
     } catch (e) {
@@ -203,14 +175,82 @@ class _ForYouTabState extends State<ForYouTab> {
     setState(() {
       _hasError = false;
       _items.clear();
-      _page = 1;
-      _activeRegionCategoryId = null;
-      _hasMore = true;
       _loading = true;
       _heroIndex = 0;
       _tickerIndex = 0;
     });
     await _fetchPage(isInitial: true);
+  }
+
+  Future<List<Article>> _buildForYouFeed() async {
+    final location = _locationService;
+    if (location == null) return [];
+
+    final since = DateTime.now().subtract(const Duration(hours: 24));
+    final languageCode = _languageService.appLocale.languageCode;
+    final combined = <Article>[];
+    final seenIds = <int>{};
+
+    Future<void> appendBucket(int? categoryId, {bool recentOnly = true}) async {
+      if (categoryId == null) return;
+      final posts = await _rss.fetchCategoryPosts(
+        categoryId: categoryId,
+        perPage: 20,
+        languageCode: languageCode,
+        after: recentOnly ? since : null,
+      );
+      for (final post in posts) {
+        if (post.id != null && seenIds.add(post.id!)) {
+          combined.add(post);
+        }
+      }
+    }
+
+    final primaryCategoryId = await _resolvePrimaryRegionCategoryId();
+    final stateCategoryId = await _resolveStateCategoryId();
+    final countryCategoryId = await _resolveCountryCategoryId();
+
+    if ((location.country ?? '').toLowerCase() == 'india') {
+      await appendBucket(primaryCategoryId);
+      if (stateCategoryId != null && stateCategoryId != primaryCategoryId) {
+        await appendBucket(stateCategoryId);
+      }
+      if (countryCategoryId != null &&
+          countryCategoryId != primaryCategoryId &&
+          countryCategoryId != stateCategoryId) {
+        await appendBucket(countryCategoryId);
+      }
+    } else {
+      await appendBucket(stateCategoryId ?? primaryCategoryId);
+      if (countryCategoryId != null &&
+          countryCategoryId != stateCategoryId &&
+          countryCategoryId != primaryCategoryId) {
+        await appendBucket(countryCategoryId);
+      }
+
+      if (combined.isEmpty) {
+        final internationalCategoryId = await _rss.findExactCategoryId([
+          'International',
+        ]);
+        await appendBucket(internationalCategoryId, recentOnly: false);
+      }
+    }
+
+    return combined;
+  }
+
+  Future<int?> _resolveStateCategoryId() async {
+    final location = _locationService;
+    if (location == null || (location.state ?? '').isEmpty) return null;
+    final exact = await _rss.findExactCategoryId([location.state!]);
+    if (exact != null) return exact;
+    return _rss.findLooseCategoryId([location.state!]);
+  }
+
+  Future<int?> _resolveCountryCategoryId() async {
+    final location = _locationService;
+    if (location == null || (location.country ?? '').isEmpty) return null;
+    return _rss.findExactCategoryId([location.country!]);
   }
 
   void _setupAutoPlay() {
@@ -276,7 +316,7 @@ class _ForYouTabState extends State<ForYouTab> {
           : ListView.builder(
               padding: const EdgeInsets.fromLTRB(0, 8, 0, 24),
               controller: _scrollController,
-              itemCount: _items.length + (_hasMore ? 1 : 0) + 1,
+              itemCount: _items.length + 1,
               itemBuilder: (context, idx) {
                 if (idx == 0) {
                   return _buildTopSection(context);
@@ -284,15 +324,7 @@ class _ForYouTabState extends State<ForYouTab> {
 
                 final articleIndex = idx - 1;
                 if (articleIndex >= _items.length) {
-                  return _hasMore
-                      ? Center(
-                          child: Lottie.asset(
-                            'assets/loading.json',
-                            width: 150,
-                            height: 150,
-                          ),
-                        )
-                      : const SizedBox.shrink();
+                  return const SizedBox.shrink();
                 }
 
                 final article = _items[articleIndex];
