@@ -38,6 +38,7 @@ class _ForYouTabState extends State<ForYouTab> {
   Timer? _heroTimer;
   Timer? _tickerTimer;
   bool _boundDependencies = false;
+  String _feedLocationSignature = '';
 
   int _heroIndex = 0;
   int _tickerIndex = 0;
@@ -54,16 +55,16 @@ class _ForYouTabState extends State<ForYouTab> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (_boundDependencies) {
-      _languageService.removeListener(_onDependenciesChanged);
+      _languageService.removeListener(_onLanguageChanged);
     }
     _languageService = Provider.of<LanguageService>(context);
-    _languageService.addListener(_onDependenciesChanged);
+    _languageService.addListener(_onLanguageChanged);
 
     final newLocationService = Provider.of<LocationService>(context);
     if (_locationService != newLocationService) {
-      _locationService?.removeListener(_onDependenciesChanged);
+      _locationService?.removeListener(_onLocationChanged);
       _locationService = newLocationService;
-      _locationService?.addListener(_onDependenciesChanged);
+      _locationService?.addListener(_onLocationChanged);
     }
     _boundDependencies = true;
 
@@ -74,8 +75,19 @@ class _ForYouTabState extends State<ForYouTab> {
     }
   }
 
-  void _onDependenciesChanged() {
+  void _onLanguageChanged() {
     _refresh();
+  }
+
+  void _onLocationChanged() {
+    final signature = _currentLocationSignature();
+    if (signature.isEmpty || signature == _feedLocationSignature) return;
+
+    // Auto-personalize only when the first real location arrives or when the
+    // feed is still empty. Later weather refreshes should not rerun the feed.
+    if (_feedLocationSignature.isEmpty || _items.isEmpty || _hasError) {
+      unawaited(_refresh());
+    }
   }
 
   Future<int?> _resolvePrimaryRegionCategoryId() async {
@@ -185,6 +197,7 @@ class _ForYouTabState extends State<ForYouTab> {
   Future<List<Article>> _buildForYouFeed() async {
     final location = _locationService;
     if (location == null) return [];
+    _feedLocationSignature = _currentLocationSignature();
 
     final since = DateTime.now().subtract(const Duration(hours: 24));
     final languageCode = _languageService.appLocale.languageCode;
@@ -281,11 +294,25 @@ class _ForYouTabState extends State<ForYouTab> {
   void dispose() {
     _heroTimer?.cancel();
     _tickerTimer?.cancel();
-    _languageService.removeListener(_onDependenciesChanged);
-    _locationService?.removeListener(_onDependenciesChanged);
+    _languageService.removeListener(_onLanguageChanged);
+    _locationService?.removeListener(_onLocationChanged);
     _scrollController.dispose();
     _heroController.dispose();
     super.dispose();
+  }
+
+  String _currentLocationSignature() {
+    final location = _locationService;
+    if (location == null) return '';
+
+    final parts = [
+      location.city?.trim() ?? '',
+      location.district?.trim() ?? '',
+      location.state?.trim() ?? '',
+      location.country?.trim() ?? '',
+    ].where((item) => item.isNotEmpty).toList();
+
+    return parts.join('|').toLowerCase();
   }
 
   @override
@@ -415,7 +442,7 @@ class _ForYouTabState extends State<ForYouTab> {
                                 decoration: BoxDecoration(
                                   color: const Color(
                                     0xFFEEE1C7,
-                                  ).withOpacity(0.95),
+                                  ).withValues(alpha: 0.95),
                                   borderRadius: BorderRadius.circular(14),
                                 ),
                                 child: const Text(
@@ -494,7 +521,7 @@ class _ForYouTabState extends State<ForYouTab> {
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.14),
+                  color: Colors.white.withValues(alpha: 0.14),
                   borderRadius: BorderRadius.circular(999),
                 ),
                 child: const Text(

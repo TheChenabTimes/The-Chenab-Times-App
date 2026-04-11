@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:the_chenab_times/l10n/app_localizations.dart';
 import 'package:the_chenab_times/screens/notification_screen.dart';
 import 'package:the_chenab_times/screens/search_screen.dart';
+import 'package:the_chenab_times/screens/weather_screen.dart';
 import 'package:the_chenab_times/services/location_service.dart';
 import 'package:the_chenab_times/widgets/category_news_tab.dart';
 import 'package:the_chenab_times/widgets/for_you_tab.dart';
@@ -109,7 +110,7 @@ class _HomeScreenState extends State<HomeScreen>
         child: Column(
           children: [
             Container(
-              padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
+              padding: const EdgeInsets.fromLTRB(14, 12, 14, 10),
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
@@ -120,94 +121,54 @@ class _HomeScreenState extends State<HomeScreen>
               ),
               child: Row(
                 children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [Color(0xFFFFF8EE), Color(0xFFF1DEC5)],
-                      ),
-                      borderRadius: BorderRadius.circular(22),
-                      border: Border.all(color: const Color(0xFFE3CCAC)),
-                      boxShadow: const [
-                        BoxShadow(
-                          color: Color(0x12000000),
-                          blurRadius: 12,
-                          offset: Offset(0, 4),
+                  _WeatherHeaderCard(
+                    title: weatherTitle,
+                    value: weatherValue,
+                    loading: locationService.loading,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const WeatherScreen(),
                         ),
-                      ],
-                    ),
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(22),
-                      onTap: locationService.refreshLocation,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                weatherTitle,
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  color: Color(0xFF855E3A),
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                weatherValue,
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  color: Color(0xFF6D1715),
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(width: 8),
-                          AnimatedRotation(
-                            turns: locationService.loading ? 0.25 : 0,
-                            duration: const Duration(milliseconds: 450),
-                            child: Container(
-                              width: 32,
-                              height: 32,
-                              decoration: const BoxDecoration(
-                                shape: BoxShape.circle,
-                                gradient: LinearGradient(
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                  colors: [
-                                    Color(0xFFB22D1F),
-                                    Color(0xFF7C1714),
-                                  ],
-                                ),
-                              ),
-                              child: Icon(
-                                locationService.loading
-                                    ? Icons.sync_rounded
-                                    : Icons.my_location_rounded,
-                                size: 18,
-                                color: Colors.white,
-                              ),
-                            ),
+                      );
+                    },
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    flex: 2,
+                    child: Container(
+                      height: 82,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [Color(0xFFFFFBF5), Color(0xFFF4E4CD)],
+                        ),
+                        borderRadius: BorderRadius.circular(26),
+                        border: Border.all(color: const Color(0xFFE3CCAC)),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Color(0x12000000),
+                            blurRadius: 12,
+                            offset: Offset(0, 4),
                           ),
                         ],
                       ),
+                      child: Center(
+                        child: Image.asset(
+                          'lib/images/appheading.png',
+                          height: 58,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Image.asset(
-                      'lib/images/appheading.png',
-                      height: 34,
-                      fit: BoxFit.contain,
-                    ),
-                  ),
+                  const SizedBox(width: 10),
                   _PremiumHeaderActionButton(
                     icon: Icons.search_rounded,
                     semanticLabel: 'Search',
@@ -433,6 +394,108 @@ class _PremiumHeaderActionButtonState
                 ),
               ),
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _WeatherHeaderCard extends StatelessWidget {
+  const _WeatherHeaderCard({
+    required this.title,
+    required this.value,
+    required this.loading,
+    required this.onTap,
+  });
+
+  final String title;
+  final String value;
+  final bool loading;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(28),
+        onTap: onTap,
+        splashColor: const Color(0x228C1D18),
+        child: Container(
+          width: 124,
+          height: 82,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFFFFF8EE), Color(0xFFF1DEC5)],
+            ),
+            borderRadius: BorderRadius.circular(28),
+            border: Border.all(color: const Color(0xFFE3CCAC)),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x12000000),
+                blurRadius: 12,
+                offset: Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Color(0xFF855E3A),
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      value,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        color: Color(0xFF6D1715),
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              AnimatedRotation(
+                turns: loading ? 0.25 : 0,
+                duration: const Duration(milliseconds: 450),
+                child: Container(
+                  width: 34,
+                  height: 34,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [Color(0xFFB22D1F), Color(0xFF7C1714)],
+                    ),
+                  ),
+                  child: Icon(
+                    loading ? Icons.sync_rounded : Icons.my_location_rounded,
+                    size: 18,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),

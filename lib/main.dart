@@ -1,19 +1,16 @@
 import 'dart:async';
 import 'dart:typed_data';
-import 'package:http/http.dart' as http;
-import 'dart:developer';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:http/http.dart' as http;
 import 'services/summarization_service.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
-import 'package:the_chenab_times/screens/article_webview_screen.dart';
 import 'package:the_chenab_times/services/notification_provider.dart';
 import 'package:the_chenab_times/services/rss_service.dart';
 import 'package:the_chenab_times/services/saved_articles_provider.dart';
-import 'package:the_chenab_times/utils/app_status_handler.dart';
 import 'l10n/app_localizations.dart';
 import 'models/article_model.dart';
 import 'models/notification_model.dart';
@@ -337,7 +334,7 @@ class _MainScreenState extends State<MainScreen> {
                   ),
                 ),
               ),
-              title: Image.asset('lib/images/appheading.png', height: 40),
+              title: Image.asset('lib/images/appheading.png', height: 52),
               centerTitle: true,
               actions: [
                 _PremiumAppBarActionButton(
