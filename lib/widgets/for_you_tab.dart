@@ -207,6 +207,8 @@ class _ForYouTabState extends State<ForYouTab> {
       await appendBucket(countryCategoryId);
 
       if (combined.isEmpty) {
+        await appendBucket(primaryCategoryId, recentOnly: false);
+        await appendBucket(stateCategoryId, recentOnly: false);
         await appendBucket(countryCategoryId, recentOnly: false);
       }
 
@@ -218,6 +220,10 @@ class _ForYouTabState extends State<ForYouTab> {
       await appendBucket(countryCategoryId);
 
       if (combined.isEmpty) {
+        await appendBucket(
+          stateCategoryId ?? primaryCategoryId,
+          recentOnly: false,
+        );
         await appendBucket(countryCategoryId, recentOnly: false);
       }
 

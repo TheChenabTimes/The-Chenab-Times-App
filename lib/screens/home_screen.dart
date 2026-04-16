@@ -151,17 +151,17 @@ class _HomeScreenState extends State<HomeScreen>
                         );
                       },
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 6),
                     Expanded(
                       child: Center(
                         child: Image.asset(
                           'lib/images/appheading.png',
-                          height: 76,
+                          height: 82,
                           fit: BoxFit.contain,
                         ),
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 6),
                     _PremiumHeaderActionButton(
                       icon: Icons.search_rounded,
                       semanticLabel: 'Search',
@@ -170,7 +170,7 @@ class _HomeScreenState extends State<HomeScreen>
                         MaterialPageRoute(builder: (_) => const SearchScreen()),
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 6),
                     _PremiumHeaderActionButton(
                       icon: Icons.notifications_none_rounded,
                       semanticLabel: 'Notifications',
@@ -354,8 +354,8 @@ class _PremiumHeaderActionButtonState
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 240),
               curve: Curves.easeOutCubic,
-              width: 48,
-              height: 48,
+              width: 42,
+              height: 42,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: const LinearGradient(
@@ -366,12 +366,12 @@ class _PremiumHeaderActionButtonState
                 boxShadow: const [
                   BoxShadow(
                     color: Color(0x238C1D18),
-                    blurRadius: 10,
-                    offset: Offset(0, 4),
+                    blurRadius: 8,
+                    offset: Offset(0, 3),
                   ),
                 ],
               ),
-              child: Icon(widget.icon, color: Colors.white, size: 24),
+              child: Icon(widget.icon, color: Colors.white, size: 20),
             ),
           ),
         ),
@@ -402,8 +402,8 @@ class _WeatherHeaderCard extends StatelessWidget {
         onTap: onTap,
         splashColor: const Color(0x228C1D18),
         child: SizedBox(
-          width: 102,
-          height: 70,
+          width: 94,
+          height: 68,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.center,
@@ -426,7 +426,7 @@ class _WeatherHeaderCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      fontSize: 18,
+                      fontSize: 17,
                       color: Color(0xFF6D1715),
                       fontWeight: FontWeight.w800,
                     ),
