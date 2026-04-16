@@ -21,6 +21,8 @@ class ForYouTab extends StatefulWidget {
 }
 
 class _ForYouTabState extends State<ForYouTab> {
+  static const int _indiaCategoryId = 317;
+  static const int _worldCategoryId = 409;
   static const List<String> _fallbackTopics = [
     '#RegionalNews',
     '#ForYou',
@@ -94,25 +96,8 @@ class _ForYouTabState extends State<ForYouTab> {
     final location = _locationService;
     if (location == null) return null;
 
-    final cityTerms = <String>[
-      if ((location.city ?? '').isNotEmpty) location.city!,
-      if ((location.city ?? '').toLowerCase().startsWith('new '))
-        location.city!.substring(4).trim(),
-      if ((location.city ?? '').toLowerCase().startsWith('old '))
-        location.city!.substring(4).trim(),
-    ];
-
-    final districtTerms = <String>[
-      if ((location.district ?? '').isNotEmpty) location.district!,
-    ];
-
-    final stateTerms = <String>[
-      if ((location.state ?? '').isNotEmpty) location.state!,
-    ];
-
-    final countryTerms = <String>[
-      if ((location.country ?? '').isNotEmpty) location.country!,
-    ];
+    final cityTerms = _buildTownTerms(location.city);
+    final districtTerms = _expandLocationTerms(location.district);
 
     final exactTownMatch = await _rss.findExactCategoryId(cityTerms);
     if (exactTownMatch != null) return exactTownMatch;
@@ -120,20 +105,10 @@ class _ForYouTabState extends State<ForYouTab> {
     final exactDistrictMatch = await _rss.findExactCategoryId(districtTerms);
     if (exactDistrictMatch != null) return exactDistrictMatch;
 
-    if ((location.country ?? '').toLowerCase() == 'india') {
-      final exactStateMatch = await _rss.findExactCategoryId(stateTerms);
-      if (exactStateMatch != null) return exactStateMatch;
-    }
-
     final looseDistrictMatch = await _rss.findLooseCategoryId(districtTerms);
     if (looseDistrictMatch != null) return looseDistrictMatch;
 
-    if ((location.country ?? '').toLowerCase() == 'india') {
-      final looseStateMatch = await _rss.findLooseCategoryId(stateTerms);
-      if (looseStateMatch != null) return looseStateMatch;
-    }
-
-    return _rss.findExactCategoryId(countryTerms);
+    return _rss.findLooseCategoryId(cityTerms);
   }
 
   Future<void> _fetchPage({bool isInitial = false}) async {
@@ -203,9 +178,11 @@ class _ForYouTabState extends State<ForYouTab> {
     final languageCode = _languageService.appLocale.languageCode;
     final combined = <Article>[];
     final seenIds = <int>{};
+    final usedCategoryIds = <int>{};
 
     Future<void> appendBucket(int? categoryId, {bool recentOnly = true}) async {
       if (categoryId == null) return;
+      if (!usedCategoryIds.add(categoryId)) return;
       final posts = await _rss.fetchCategoryPosts(
         categoryId: categoryId,
         perPage: 20,
@@ -222,29 +199,29 @@ class _ForYouTabState extends State<ForYouTab> {
     final primaryCategoryId = await _resolvePrimaryRegionCategoryId();
     final stateCategoryId = await _resolveStateCategoryId();
     final countryCategoryId = await _resolveCountryCategoryId();
+    final internationalCategoryId = await _resolveInternationalCategoryId();
 
-    if ((location.country ?? '').toLowerCase() == 'india') {
+    if (_isIndiaLocation()) {
       await appendBucket(primaryCategoryId);
-      if (stateCategoryId != null && stateCategoryId != primaryCategoryId) {
-        await appendBucket(stateCategoryId);
-      }
-      if (countryCategoryId != null &&
-          countryCategoryId != primaryCategoryId &&
-          countryCategoryId != stateCategoryId) {
-        await appendBucket(countryCategoryId);
-      }
-    } else {
-      await appendBucket(stateCategoryId ?? primaryCategoryId);
-      if (countryCategoryId != null &&
-          countryCategoryId != stateCategoryId &&
-          countryCategoryId != primaryCategoryId) {
-        await appendBucket(countryCategoryId);
+      await appendBucket(stateCategoryId);
+      await appendBucket(countryCategoryId);
+
+      if (combined.isEmpty) {
+        await appendBucket(countryCategoryId, recentOnly: false);
       }
 
       if (combined.isEmpty) {
-        final internationalCategoryId = await _rss.findExactCategoryId([
-          'International',
-        ]);
+        await appendBucket(internationalCategoryId, recentOnly: false);
+      }
+    } else {
+      await appendBucket(stateCategoryId ?? primaryCategoryId);
+      await appendBucket(countryCategoryId);
+
+      if (combined.isEmpty) {
+        await appendBucket(countryCategoryId, recentOnly: false);
+      }
+
+      if (combined.isEmpty) {
         await appendBucket(internationalCategoryId, recentOnly: false);
       }
     }
@@ -255,15 +232,35 @@ class _ForYouTabState extends State<ForYouTab> {
   Future<int?> _resolveStateCategoryId() async {
     final location = _locationService;
     if (location == null || (location.state ?? '').isEmpty) return null;
-    final exact = await _rss.findExactCategoryId([location.state!]);
+    final stateTerms = _expandLocationTerms(location.state);
+    final exact = await _rss.findExactCategoryId(stateTerms);
     if (exact != null) return exact;
-    return _rss.findLooseCategoryId([location.state!]);
+    return _rss.findLooseCategoryId(stateTerms);
   }
 
   Future<int?> _resolveCountryCategoryId() async {
     final location = _locationService;
     if (location == null || (location.country ?? '').isEmpty) return null;
-    return _rss.findExactCategoryId([location.country!]);
+    final countryTerms = _buildCountryTerms(location.country);
+    final exact = await _rss.findExactCategoryId(countryTerms);
+    if (exact != null) return exact;
+
+    final loose = await _rss.findLooseCategoryId(countryTerms);
+    if (loose != null) return loose;
+
+    return _isIndiaLocation() ? _indiaCategoryId : null;
+  }
+
+  Future<int?> _resolveInternationalCategoryId() async {
+    final exact = await _rss.findExactCategoryId(['International', 'World']);
+    if (exact != null) return exact;
+
+    final loose = await _rss.findLooseCategoryId([
+      'International',
+      'World',
+      'Global',
+    ]);
+    return loose ?? _worldCategoryId;
   }
 
   void _setupAutoPlay() {
@@ -313,6 +310,53 @@ class _ForYouTabState extends State<ForYouTab> {
     ].where((item) => item.isNotEmpty).toList();
 
     return parts.join('|').toLowerCase();
+  }
+
+  bool _isIndiaLocation() {
+    final country = _normalizePlaceName(_locationService?.country);
+    return country == 'india' || country == 'bharat';
+  }
+
+  List<String> _buildTownTerms(String? value) {
+    final terms = _expandLocationTerms(value).toSet();
+    final lower = (value ?? '').trim().toLowerCase();
+    if (lower.startsWith('new ')) {
+      terms.add(value!.trim().substring(4).trim());
+    }
+    if (lower.startsWith('old ')) {
+      terms.add(value!.trim().substring(4).trim());
+    }
+    return terms.where((item) => item.trim().isNotEmpty).toList();
+  }
+
+  List<String> _buildCountryTerms(String? value) {
+    final terms = _expandLocationTerms(value).toSet();
+    if (_isIndiaLocation()) {
+      terms.addAll(['India', 'Bharat']);
+    }
+    return terms.where((item) => item.trim().isNotEmpty).toList();
+  }
+
+  List<String> _expandLocationTerms(String? value) {
+    final raw = (value ?? '').trim();
+    if (raw.isEmpty) return const [];
+
+    final terms = <String>{raw};
+    if (raw.contains('&')) {
+      terms.add(raw.replaceAll('&', 'and'));
+    }
+    if (raw.toLowerCase().contains(' and ')) {
+      terms.add(raw.replaceAll(RegExp(r'\band\b', caseSensitive: false), '&'));
+    }
+    return terms.where((item) => item.trim().isNotEmpty).toList();
+  }
+
+  String _normalizePlaceName(String? value) {
+    return (value ?? '')
+        .toLowerCase()
+        .replaceAll('&', 'and')
+        .replaceAll(RegExp(r'[^a-z]+'), ' ')
+        .trim();
   }
 
   @override

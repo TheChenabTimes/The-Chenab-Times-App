@@ -151,17 +151,17 @@ class _HomeScreenState extends State<HomeScreen>
                         );
                       },
                     ),
-                    const SizedBox(width: 10),
+                    const SizedBox(width: 8),
                     Expanded(
                       child: Center(
                         child: Image.asset(
                           'lib/images/appheading.png',
-                          height: 66,
+                          height: 76,
                           fit: BoxFit.contain,
                         ),
                       ),
                     ),
-                    const SizedBox(width: 10),
+                    const SizedBox(width: 8),
                     _PremiumHeaderActionButton(
                       icon: Icons.search_rounded,
                       semanticLabel: 'Search',
@@ -170,7 +170,7 @@ class _HomeScreenState extends State<HomeScreen>
                         MaterialPageRoute(builder: (_) => const SearchScreen()),
                       ),
                     ),
-                    const SizedBox(width: 10),
+                    const SizedBox(width: 8),
                     _PremiumHeaderActionButton(
                       icon: Icons.notifications_none_rounded,
                       semanticLabel: 'Notifications',
@@ -354,8 +354,8 @@ class _PremiumHeaderActionButtonState
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 240),
               curve: Curves.easeOutCubic,
-              width: 58,
-              height: 58,
+              width: 48,
+              height: 48,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: const LinearGradient(
@@ -366,12 +366,12 @@ class _PremiumHeaderActionButtonState
                 boxShadow: const [
                   BoxShadow(
                     color: Color(0x238C1D18),
-                    blurRadius: 14,
-                    offset: Offset(0, 6),
+                    blurRadius: 10,
+                    offset: Offset(0, 4),
                   ),
                 ],
               ),
-              child: Icon(widget.icon, color: Colors.white, size: 29),
+              child: Icon(widget.icon, color: Colors.white, size: 24),
             ),
           ),
         ),
@@ -402,60 +402,48 @@ class _WeatherHeaderCard extends StatelessWidget {
         onTap: onTap,
         splashColor: const Color(0x228C1D18),
         child: SizedBox(
-          width: 116,
-          height: 74,
-          child: Row(
+          width: 102,
+          height: 70,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Color(0xFF7E5C3B),
-                        fontWeight: FontWeight.w700,
-                      ),
+              Text(
+                title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: Color(0xFF7E5C3B),
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  Text(
+                    value,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      color: Color(0xFF6D1715),
+                      fontWeight: FontWeight.w800,
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      value,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        color: Color(0xFF6D1715),
-                        fontWeight: FontWeight.w800,
+                  ),
+                  if (loading) ...[
+                    const SizedBox(width: 6),
+                    const SizedBox(
+                      width: 12,
+                      height: 12,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 1.8,
+                        valueColor: AlwaysStoppedAnimation(Color(0xFF8C1D18)),
+                        backgroundColor: Color(0xFFE7D5BE),
                       ),
                     ),
                   ],
-                ),
-              ),
-              const SizedBox(width: 8),
-              AnimatedRotation(
-                turns: loading ? 0.25 : 0,
-                duration: const Duration(milliseconds: 450),
-                child: Container(
-                  width: 28,
-                  height: 28,
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [Color(0xFFB22D1F), Color(0xFF7C1714)],
-                    ),
-                  ),
-                  child: Icon(
-                    loading ? Icons.sync_rounded : Icons.my_location_rounded,
-                    size: 16,
-                    color: Colors.white,
-                  ),
-                ),
+                ],
               ),
             ],
           ),
