@@ -2,12 +2,32 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:the_chenab_times/models/article_model.dart';
 import 'package:the_chenab_times/models/notification_model.dart';
+import 'package:the_chenab_times/services/language_service.dart';
 import 'package:the_chenab_times/services/notification_provider.dart';
 import 'package:the_chenab_times/services/rss_service.dart';
 import 'package:the_chenab_times/screens/article_screen.dart';
 
-class NotificationScreen extends StatelessWidget {
+class NotificationScreen extends StatefulWidget {
   const NotificationScreen({super.key});
+
+  @override
+  State<NotificationScreen> createState() => _NotificationScreenState();
+}
+
+class _NotificationScreenState extends State<NotificationScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final provider = context.read<NotificationProvider>();
+      await provider.loadNotifications();
+      final languageCode = context.read<LanguageService>().appLocale.languageCode;
+      await provider.syncLatestPosts(languageCode: languageCode, seedIfEmpty: false);
+      if (mounted) {
+        await provider.loadNotifications();
+      }
+    });
+  }
 
   /// This handles what happens when you click a notification row in the list
   Future<void> _handleNotificationClick(BuildContext context, NotificationModel notification) async {
@@ -65,6 +85,13 @@ class NotificationScreen extends StatelessWidget {
     }
   }
 
+  Future<void> _refreshNotifications(BuildContext context) async {
+    final provider = context.read<NotificationProvider>();
+    final languageCode = context.read<LanguageService>().appLocale.languageCode;
+    await provider.syncLatestPosts(languageCode: languageCode, seedIfEmpty: false);
+    await provider.loadNotifications();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -89,30 +116,41 @@ class NotificationScreen extends StatelessWidget {
           }
 
           if (provider.notifications.isEmpty) {
-            return const Center(child: Text('No notifications yet.'));
+            return RefreshIndicator(
+              onRefresh: () => _refreshNotifications(context),
+              child: ListView(
+                children: const [
+                  SizedBox(height: 180),
+                  Center(child: Text('No notifications yet. Pull down to check for new posts.')),
+                ],
+              ),
+            );
           }
 
-          return ListView.builder(
-            itemCount: provider.notifications.length,
-            itemBuilder: (context, index) {
-              final notification = provider.notifications[index];
-              return ListTile(
-                leading: notification.imageUrl != null
-                    ? Image.network(notification.imageUrl!, width: 50, height: 50, fit: BoxFit.cover)
-                    : const Icon(Icons.notifications),
-                title: Text(
-                  notification.title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                subtitle: Text(
-                  notification.body,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                onTap: () => _handleNotificationClick(context, notification),
-              );
-            },
+          return RefreshIndicator(
+            onRefresh: () => _refreshNotifications(context),
+            child: ListView.builder(
+              itemCount: provider.notifications.length,
+              itemBuilder: (context, index) {
+                final notification = provider.notifications[index];
+                return ListTile(
+                  leading: notification.imageUrl != null
+                      ? Image.network(notification.imageUrl!, width: 50, height: 50, fit: BoxFit.cover)
+                      : const Icon(Icons.notifications),
+                  title: Text(
+                    notification.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  subtitle: Text(
+                    notification.body,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  onTap: () => _handleNotificationClick(context, notification),
+                );
+              },
+            ),
           );
         },
       ),

@@ -32,6 +32,34 @@ class RssService {
     }
   }
 
+  Future<Article?> fetchArticleByUrl(String url, {String? languageCode}) async {
+    final uri = Uri.tryParse(url);
+    if (uri == null) return null;
+
+    final segments = uri.pathSegments.where((segment) => segment.isNotEmpty).toList();
+    if (segments.isEmpty) return null;
+
+    final slug = segments.last;
+    var requestUrl = '$postsBaseUrl?slug=${Uri.encodeQueryComponent(slug)}&_embed=true&per_page=1';
+    if (languageCode != null && languageCode != 'en') {
+      requestUrl += '&lang=$languageCode';
+    }
+
+    try {
+      final resp = await http
+          .get(Uri.parse(requestUrl))
+          .timeout(const Duration(seconds: 15));
+      if (resp.statusCode != 200) return null;
+
+      final List<dynamic> data = json.decode(resp.body) as List<dynamic>;
+      if (data.isEmpty) return null;
+      return Article.fromJson(data.first as Map<String, dynamic>);
+    } catch (e) {
+      log('Error fetching article by URL: $e');
+      return null;
+    }
+  }
+
   /// Fetch list of posts for the home screen
   Future<List<Article>> fetchPostsPage({
     int page = 1,

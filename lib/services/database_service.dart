@@ -20,7 +20,7 @@ class DatabaseService {
   Future<Database> _initDB() async {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, 'the_chenab_times.db');
-    return await openDatabase(path, version: 6, onCreate: _onCreate, onUpgrade: _onUpgrade);
+    return await openDatabase(path, version: 7, onCreate: _onCreate, onUpgrade: _onUpgrade);
   }
 
   Future<void> _onCreate(Database db, int version) async {
@@ -54,6 +54,9 @@ class DatabaseService {
     }
     if (oldVersion < 6) {
       await db.execute('CREATE TABLE IF NOT EXISTS summary_cache(id INTEGER PRIMARY KEY AUTOINCREMENT, article_link TEXT NOT NULL UNIQUE, summary TEXT NOT NULL, cached_at INTEGER NOT NULL)');
+    }
+    if (oldVersion < 7) {
+      await db.execute('ALTER TABLE notifications ADD COLUMN post_id INTEGER');
     }
   }
 
@@ -96,7 +99,8 @@ class DatabaseService {
       body TEXT NOT NULL,
       image_url TEXT,
       received_at TEXT NOT NULL,
-      article_data TEXT
+      article_data TEXT,
+      post_id INTEGER
     )
     ''');
   }

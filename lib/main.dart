@@ -168,6 +168,10 @@ void main() async {
         await LanguageService.instance.init();
         await notificationProvider
             .loadNotifications(); // Load initial notifications
+        await notificationProvider.syncLatestPosts(
+          languageCode: LanguageService.instance.appLocale.languageCode,
+        );
+        await notificationProvider.loadNotifications();
         // Background pre-fetch summaries
         Future.delayed(const Duration(seconds: 3), () async {
           try {
@@ -278,6 +282,7 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
+  Timer? _notificationRefreshTimer;
 
   final List<Widget> _screens = [
     const HomeScreen(),
@@ -291,6 +296,23 @@ class _MainScreenState extends State<MainScreen> {
     setState(() {
       _selectedIndex = index;
     });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _notificationRefreshTimer = Timer.periodic(const Duration(minutes: 5), (_) {
+      if (!mounted) return;
+      final provider = context.read<NotificationProvider>();
+      final languageCode = context.read<LanguageService>().appLocale.languageCode;
+      unawaited(provider.syncLatestPosts(languageCode: languageCode, seedIfEmpty: false));
+    });
+  }
+
+  @override
+  void dispose() {
+    _notificationRefreshTimer?.cancel();
+    super.dispose();
   }
 
   @override

@@ -176,45 +176,100 @@ class _ForYouTabState extends State<ForYouTab> {
 
     final since = DateTime.now().subtract(const Duration(hours: 24));
     final languageCode = _languageService.appLocale.languageCode;
+    final primaryCategoryId = await _resolvePrimaryRegionCategoryId();
+    final stateCategoryId = await _resolveStateCategoryId();
+    final countryCategoryId = await _resolveCountryCategoryId();
+    final internationalCategoryId = await _resolveInternationalCategoryId();
+    final recentPosts = await _rss.fetchPostsPage(
+      perPage: 80,
+      languageCode: languageCode,
+      after: since,
+    );
+
     final combined = <Article>[];
     final seenIds = <int>{};
-    final usedCategoryIds = <int>{};
+    final protectedCategoryIds = <int>{
+      if (primaryCategoryId != null) primaryCategoryId,
+      if (stateCategoryId != null) stateCategoryId,
+      if (countryCategoryId != null) countryCategoryId,
+    };
 
-    Future<void> appendBucket(int? categoryId, {bool recentOnly = true}) async {
+    void appendMatchingBucket(int? categoryId) {
       if (categoryId == null) return;
-      if (!usedCategoryIds.add(categoryId)) return;
-      final posts = await _rss.fetchCategoryPosts(
-        categoryId: categoryId,
-        perPage: 20,
-        languageCode: languageCode,
-        after: recentOnly ? since : null,
-      );
-      for (final post in posts) {
+      final bucketPosts = recentPosts.where((post) {
+        if (!post.categoryIds.contains(categoryId)) return false;
+        if (_isIndiaLocation() &&
+            internationalCategoryId != null &&
+            post.categoryIds.contains(internationalCategoryId) &&
+            !post.categoryIds.any(protectedCategoryIds.contains)) {
+          return false;
+        }
+        return true;
+      });
+      for (final post in bucketPosts) {
         if (post.id != null && seenIds.add(post.id!)) {
           combined.add(post);
         }
       }
     }
 
-    final primaryCategoryId = await _resolvePrimaryRegionCategoryId();
-    final stateCategoryId = await _resolveStateCategoryId();
-    final countryCategoryId = await _resolveCountryCategoryId();
-    final internationalCategoryId = await _resolveInternationalCategoryId();
-
     if (_isIndiaLocation()) {
-      await appendBucket(primaryCategoryId);
-      await appendBucket(stateCategoryId);
-      await appendBucket(countryCategoryId);
-
-      if (combined.isEmpty) {
-        await appendBucket(internationalCategoryId, recentOnly: false);
-      }
+      appendMatchingBucket(primaryCategoryId);
+      appendMatchingBucket(stateCategoryId);
+      appendMatchingBucket(countryCategoryId);
     } else {
-      await appendBucket(stateCategoryId ?? primaryCategoryId);
-      await appendBucket(countryCategoryId);
+      appendMatchingBucket(stateCategoryId ?? primaryCategoryId);
+      appendMatchingBucket(countryCategoryId);
+    }
 
-      if (combined.isEmpty) {
-        await appendBucket(internationalCategoryId, recentOnly: false);
+    if (combined.isNotEmpty) {
+      return combined;
+    }
+
+    Future<List<Article>> fetchBucketFallback(int? categoryId) async {
+      if (categoryId == null) return const [];
+      return _rss.fetchCategoryPosts(
+        categoryId: categoryId,
+        perPage: 30,
+        languageCode: languageCode,
+        after: since,
+      );
+    }
+
+    final bucketFallbacks = _isIndiaLocation()
+        ? [
+            await fetchBucketFallback(primaryCategoryId),
+            await fetchBucketFallback(stateCategoryId),
+            await fetchBucketFallback(countryCategoryId),
+          ]
+        : [
+            await fetchBucketFallback(stateCategoryId ?? primaryCategoryId),
+            await fetchBucketFallback(countryCategoryId),
+          ];
+
+    for (final bucket in bucketFallbacks) {
+      for (final post in bucket) {
+        if (post.id != null && seenIds.add(post.id!)) {
+          combined.add(post);
+        }
+      }
+    }
+
+    if (combined.isNotEmpty) {
+      return combined;
+    }
+
+    if (!_isIndiaLocation()) {
+      final internationalPosts = await _rss.fetchCategoryPosts(
+        categoryId: internationalCategoryId ?? _worldCategoryId,
+        perPage: 20,
+        languageCode: languageCode,
+        after: since,
+      );
+      for (final post in internationalPosts) {
+        if (post.id != null && seenIds.add(post.id!)) {
+          combined.add(post);
+        }
       }
     }
 

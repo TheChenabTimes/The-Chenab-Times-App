@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class GamesScreen extends StatefulWidget {
   const GamesScreen({super.key});
@@ -10,30 +11,98 @@ class GamesScreen extends StatefulWidget {
 }
 
 class _GamesScreenState extends State<GamesScreen> {
+  static const _scrambleStreakKey = 'games_scramble_streak';
+  static const _vocabScoreKey = 'games_vocab_score';
+  static const _sentenceScoreKey = 'games_sentence_score';
+  static const _spellingScoreKey = 'games_spelling_score';
+  static const _crosswordScoreKey = 'games_crossword_score';
+  static const _lastScrambleKey = 'games_last_scramble_index';
+  static const _lastVocabKey = 'games_last_vocab_index';
+  static const _lastSentenceKey = 'games_last_sentence_index';
+  static const _lastSpellingKey = 'games_last_spelling_index';
+  static const _lastCrosswordKey = 'games_last_crossword_index';
+
   final Random _random = Random();
 
   late _WordScramblePuzzle _scramblePuzzle;
   late _VocabQuestion _vocabQuestion;
   late _SentenceChallenge _sentenceChallenge;
+  late _SpellingBeeQuestion _spellingBeeQuestion;
+  late _CrosswordPuzzle _crosswordPuzzle;
 
   int _scrambleStreak = 0;
   int _vocabScore = 0;
   int _sentenceScore = 0;
+  int _spellingScore = 0;
+  int _crosswordScore = 0;
+  int _lastScrambleIndex = -1;
+  int _lastVocabIndex = -1;
+  int _lastSentenceIndex = -1;
+  int _lastSpellingIndex = -1;
+  int _lastCrosswordIndex = -1;
+  bool _loading = true;
 
   final TextEditingController _scrambleController = TextEditingController();
+  final TextEditingController _crosswordController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _scramblePuzzle = _nextScramblePuzzle();
-    _vocabQuestion = _nextVocabQuestion();
-    _sentenceChallenge = _nextSentenceChallenge();
+    _loadProgress();
   }
 
   @override
   void dispose() {
     _scrambleController.dispose();
+    _crosswordController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadProgress() async {
+    final prefs = await SharedPreferences.getInstance();
+    _scrambleStreak = prefs.getInt(_scrambleStreakKey) ?? 0;
+    _vocabScore = prefs.getInt(_vocabScoreKey) ?? 0;
+    _sentenceScore = prefs.getInt(_sentenceScoreKey) ?? 0;
+    _spellingScore = prefs.getInt(_spellingScoreKey) ?? 0;
+    _crosswordScore = prefs.getInt(_crosswordScoreKey) ?? 0;
+    _lastScrambleIndex = prefs.getInt(_lastScrambleKey) ?? -1;
+    _lastVocabIndex = prefs.getInt(_lastVocabKey) ?? -1;
+    _lastSentenceIndex = prefs.getInt(_lastSentenceKey) ?? -1;
+    _lastSpellingIndex = prefs.getInt(_lastSpellingKey) ?? -1;
+    _lastCrosswordIndex = prefs.getInt(_lastCrosswordKey) ?? -1;
+
+    _scramblePuzzle = _nextScramblePuzzle();
+    _vocabQuestion = _nextVocabQuestion();
+    _sentenceChallenge = _nextSentenceChallenge();
+    _spellingBeeQuestion = _nextSpellingBeeQuestion();
+    _crosswordPuzzle = _nextCrosswordPuzzle();
+
+    if (mounted) {
+      setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _saveProgress() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_scrambleStreakKey, _scrambleStreak);
+    await prefs.setInt(_vocabScoreKey, _vocabScore);
+    await prefs.setInt(_sentenceScoreKey, _sentenceScore);
+    await prefs.setInt(_spellingScoreKey, _spellingScore);
+    await prefs.setInt(_crosswordScoreKey, _crosswordScore);
+    await prefs.setInt(_lastScrambleKey, _lastScrambleIndex);
+    await prefs.setInt(_lastVocabKey, _lastVocabIndex);
+    await prefs.setInt(_lastSentenceKey, _lastSentenceIndex);
+    await prefs.setInt(_lastSpellingKey, _lastSpellingIndex);
+    await prefs.setInt(_lastCrosswordKey, _lastCrosswordIndex);
+  }
+
+  int _nextDifferentIndex(int length, int lastIndex) {
+    if (length <= 1) return 0;
+    var nextIndex = _random.nextInt(length);
+    while (nextIndex == lastIndex) {
+      nextIndex = _random.nextInt(length);
+    }
+    return nextIndex;
   }
 
   @override
@@ -48,40 +117,65 @@ class _GamesScreenState extends State<GamesScreen> {
       ),
       child: SafeArea(
         top: false,
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(14, 18, 14, 28),
-          children: [
-            _buildHero(),
-            const SizedBox(height: 16),
-            _buildSectionTitle(
-              title: 'Word Scramble',
-              subtitle:
-                  'Unscramble useful English words from real-world usage.',
-            ),
-            const SizedBox(height: 10),
-            _buildScrambleCard(),
-            const SizedBox(height: 18),
-            _buildSectionTitle(
-              title: 'Meaning Match',
-              subtitle: 'Pick the closest meaning to grow vocabulary offline.',
-            ),
-            const SizedBox(height: 10),
-            _buildVocabCard(),
-            const SizedBox(height: 18),
-            _buildSectionTitle(
-              title: 'Sentence Builder',
-              subtitle:
-                  'Choose the best sentence to sound more natural in English.',
-            ),
-            const SizedBox(height: 10),
-            _buildSentenceCard(),
-          ],
-        ),
+        child: _loading
+            ? const Center(child: CircularProgressIndicator())
+            : ListView(
+                padding: const EdgeInsets.fromLTRB(14, 18, 14, 28),
+                children: [
+                  _buildHero(),
+                  const SizedBox(height: 16),
+                  _buildSectionTitle(
+                    title: 'Word Scramble',
+                    subtitle:
+                        'Unscramble useful English words from real-world usage.',
+                  ),
+                  const SizedBox(height: 10),
+                  _buildScrambleCard(),
+                  const SizedBox(height: 18),
+                  _buildSectionTitle(
+                    title: 'Meaning Match',
+                    subtitle:
+                        'Pick the closest meaning to grow vocabulary offline.',
+                  ),
+                  const SizedBox(height: 10),
+                  _buildVocabCard(),
+                  const SizedBox(height: 18),
+                  _buildSectionTitle(
+                    title: 'Sentence Builder',
+                    subtitle:
+                        'Choose the best sentence to sound more natural in English.',
+                  ),
+                  const SizedBox(height: 10),
+                  _buildSentenceCard(),
+                  const SizedBox(height: 18),
+                  _buildSectionTitle(
+                    title: 'Spelling Bee',
+                    subtitle:
+                        'Choose the correct spelling from similar-looking words.',
+                  ),
+                  const SizedBox(height: 10),
+                  _buildSpellingBeeCard(),
+                  const SizedBox(height: 18),
+                  _buildSectionTitle(
+                    title: 'Mini Crossword',
+                    subtitle:
+                        'Solve clue-based word puzzles with saved progress.',
+                  ),
+                  const SizedBox(height: 10),
+                  _buildCrosswordCard(),
+                ],
+              ),
       ),
     );
   }
 
   Widget _buildHero() {
+    final totalPoints =
+        _scrambleStreak +
+        _vocabScore +
+        _sentenceScore +
+        _spellingScore +
+        _crosswordScore;
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
@@ -120,7 +214,7 @@ class _GamesScreenState extends State<GamesScreen> {
             ),
           ),
           const SizedBox(width: 14),
-          const Expanded(
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -134,11 +228,20 @@ class _GamesScreenState extends State<GamesScreen> {
                 ),
                 SizedBox(height: 6),
                 Text(
-                  'Practice vocabulary, spelling, and sentence sense without internet.',
+                  'Practice vocabulary, spelling, crossword clues, and sentence sense without internet.',
                   style: TextStyle(
                     color: Color(0xFF7A6247),
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
+                  ),
+                ),
+                SizedBox(height: 8),
+                Text(
+                  'Saved points: $totalPoints',
+                  style: TextStyle(
+                    color: Color(0xFF8C1D18),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
               ],
@@ -278,8 +381,10 @@ class _GamesScreenState extends State<GamesScreen> {
               _ScorePill(label: 'Score', value: '$_vocabScore'),
               const Spacer(),
               TextButton(
-                onPressed: () =>
-                    setState(() => _vocabQuestion = _nextVocabQuestion()),
+                onPressed: () {
+                  setState(() => _vocabQuestion = _nextVocabQuestion());
+                  _saveProgress();
+                },
                 child: const Text('Skip'),
               ),
             ],
@@ -338,9 +443,10 @@ class _GamesScreenState extends State<GamesScreen> {
               _ScorePill(label: 'Correct', value: '$_sentenceScore'),
               const Spacer(),
               TextButton(
-                onPressed: () => setState(
-                  () => _sentenceChallenge = _nextSentenceChallenge(),
-                ),
+                onPressed: () {
+                  setState(() => _sentenceChallenge = _nextSentenceChallenge());
+                  _saveProgress();
+                },
                 child: const Text('Next'),
               ),
             ],
@@ -389,11 +495,147 @@ class _GamesScreenState extends State<GamesScreen> {
     );
   }
 
+  Widget _buildSpellingBeeCard() {
+    return _GameCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              _ScorePill(label: 'Score', value: '$_spellingScore'),
+              const Spacer(),
+              TextButton(
+                onPressed: () {
+                  setState(
+                    () => _spellingBeeQuestion = _nextSpellingBeeQuestion(),
+                  );
+                  _saveProgress();
+                },
+                child: const Text('Next'),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            _spellingBeeQuestion.prompt,
+            style: const TextStyle(
+              color: Color(0xFF3B2417),
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 14),
+          ..._spellingBeeQuestion.options.map(
+            (option) => Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: OutlinedButton(
+                onPressed: () => _submitSpellingBee(option),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 14,
+                  ),
+                  side: const BorderSide(color: Color(0xFFE3CCAC)),
+                  backgroundColor: const Color(0xFFFFFBF5),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    option,
+                    style: const TextStyle(
+                      color: Color(0xFF4A2017),
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCrosswordCard() {
+    return _GameCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              _ScorePill(label: 'Solved', value: '$_crosswordScore'),
+              const Spacer(),
+              TextButton(
+                onPressed: () {
+                  setState(() {
+                    _crosswordPuzzle = _nextCrosswordPuzzle();
+                    _crosswordController.clear();
+                  });
+                  _saveProgress();
+                },
+                child: const Text('New clue'),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            _crosswordPuzzle.clue,
+            style: const TextStyle(
+              color: Color(0xFF3B2417),
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Letters: ${_crosswordPuzzle.answer.length}',
+            style: const TextStyle(
+              color: Color(0xFF7A6247),
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 14),
+          TextField(
+            controller: _crosswordController,
+            decoration: InputDecoration(
+              hintText: 'Type the answer',
+              filled: true,
+              fillColor: const Color(0xFFFFFBF5),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: const BorderSide(color: Color(0xFFE4CEB2)),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: const BorderSide(color: Color(0xFFE4CEB2)),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          FilledButton(
+            onPressed: _submitCrossword,
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xFF8C1D18),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ),
+            child: const Text('Solve Clue'),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _resetScramble() {
     setState(() {
       _scramblePuzzle = _nextScramblePuzzle();
       _scrambleController.clear();
     });
+    _saveProgress();
   }
 
   void _submitScramble() {
@@ -412,6 +654,7 @@ class _GamesScreenState extends State<GamesScreen> {
         isSuccess: false,
       );
     }
+    _saveProgress();
   }
 
   void _submitVocab(String option) {
@@ -426,6 +669,7 @@ class _GamesScreenState extends State<GamesScreen> {
       );
     }
     setState(() => _vocabQuestion = _nextVocabQuestion());
+    _saveProgress();
   }
 
   void _submitSentence(String option) {
@@ -440,6 +684,40 @@ class _GamesScreenState extends State<GamesScreen> {
       );
     }
     setState(() => _sentenceChallenge = _nextSentenceChallenge());
+    _saveProgress();
+  }
+
+  void _submitSpellingBee(String option) {
+    final correct = option == _spellingBeeQuestion.answer;
+    if (correct) {
+      setState(() => _spellingScore++);
+      _showFeedback('Correct spelling.', isSuccess: true);
+    } else {
+      _showFeedback(
+        'Correct answer: ${_spellingBeeQuestion.answer}',
+        isSuccess: false,
+      );
+    }
+    setState(() => _spellingBeeQuestion = _nextSpellingBeeQuestion());
+    _saveProgress();
+  }
+
+  void _submitCrossword() {
+    final answer = _crosswordController.text.trim().toLowerCase();
+    if (answer == _crosswordPuzzle.answer.toLowerCase()) {
+      setState(() {
+        _crosswordScore++;
+        _crosswordPuzzle = _nextCrosswordPuzzle();
+        _crosswordController.clear();
+      });
+      _showFeedback('Great solve.', isSuccess: true);
+    } else {
+      _showFeedback(
+        'Try again. Hint: ${_crosswordPuzzle.clue}',
+        isSuccess: false,
+      );
+    }
+    _saveProgress();
   }
 
   void _showFeedback(String message, {required bool isSuccess}) {
@@ -475,8 +753,24 @@ class _GamesScreenState extends State<GamesScreen> {
         answer: 'journalist',
         hint: 'A person who reports news',
       ),
+      _WordScramblePuzzle(answer: 'analysis', hint: 'Detailed examination'),
+      _WordScramblePuzzle(answer: 'headline', hint: 'Main title of a story'),
+      _WordScramblePuzzle(answer: 'accuracy', hint: 'Freedom from mistakes'),
+      _WordScramblePuzzle(answer: 'culture', hint: 'Shared way of life'),
+      _WordScramblePuzzle(answer: 'economy', hint: 'System of money and trade'),
+      _WordScramblePuzzle(answer: 'context', hint: 'Background meaning'),
+      _WordScramblePuzzle(answer: 'clarity', hint: 'Easy to understand quality'),
+      _WordScramblePuzzle(answer: 'feature', hint: 'A longer detailed story'),
+      _WordScramblePuzzle(answer: 'forecast', hint: 'Prediction for the future'),
+      _WordScramblePuzzle(answer: 'digital', hint: 'Using computer technology'),
+      _WordScramblePuzzle(answer: 'citizen', hint: 'A member of a country'),
+      _WordScramblePuzzle(answer: 'regional', hint: 'Linked to a specific area'),
+      _WordScramblePuzzle(answer: 'resilient', hint: 'Able to recover quickly'),
+      _WordScramblePuzzle(answer: 'diligent', hint: 'Showing careful effort'),
+      _WordScramblePuzzle(answer: 'concise', hint: 'Brief but clear'),
     ];
-    final selected = puzzles[_random.nextInt(puzzles.length)];
+    _lastScrambleIndex = _nextDifferentIndex(puzzles.length, _lastScrambleIndex);
+    final selected = puzzles[_lastScrambleIndex];
     return selected.scrambledVariant(_random);
   }
 
@@ -502,8 +796,39 @@ class _GamesScreenState extends State<GamesScreen> {
         answer: 'self-assured',
         options: ['self-assured', 'sleepy', 'confused', 'distant'],
       ),
+      _VocabQuestion(
+        word: 'reliable',
+        answer: 'dependable',
+        options: ['dependable', 'careless', 'fragile', 'unknown'],
+      ),
+      _VocabQuestion(
+        word: 'vibrant',
+        answer: 'full of energy',
+        options: ['silent', 'full of energy', 'very old', 'nearly empty'],
+      ),
+      _VocabQuestion(
+        word: 'context',
+        answer: 'background meaning',
+        options: ['background meaning', 'quick answer', 'public anger', 'final result'],
+      ),
+      _VocabQuestion(
+        word: 'insight',
+        answer: 'deep understanding',
+        options: ['deep understanding', 'loud complaint', 'public holiday', 'written order'],
+      ),
+      _VocabQuestion(
+        word: 'timely',
+        answer: 'at the right moment',
+        options: ['at the right moment', 'too expensive', 'hard to read', 'very distant'],
+      ),
+      _VocabQuestion(
+        word: 'inquiry',
+        answer: 'question',
+        options: ['question', 'celebration', 'accident', 'reward'],
+      ),
     ];
-    return questions[_random.nextInt(questions.length)];
+    _lastVocabIndex = _nextDifferentIndex(questions.length, _lastVocabIndex);
+    return questions[_lastVocabIndex];
   }
 
   _SentenceChallenge _nextSentenceChallenge() {
@@ -535,8 +860,113 @@ class _GamesScreenState extends State<GamesScreen> {
           'She clear explained everyone the news.',
         ],
       ),
+      _SentenceChallenge(
+        prompt: 'Choose the best sentence for a formal update.',
+        answer: 'I will share the report once the review is complete.',
+        options: [
+          'I share report once review complete.',
+          'I will share the report once the review is complete.',
+          'The report I will sharing after review complete.',
+        ],
+      ),
+      _SentenceChallenge(
+        prompt: 'Pick the most natural everyday sentence.',
+        answer: 'We reached the office earlier than expected.',
+        options: [
+          'We reached earlier than expected the office.',
+          'We reached the office earlier than expected.',
+          'We was reaching office earlier expected.',
+        ],
+      ),
+      _SentenceChallenge(
+        prompt: 'Choose the clearer standard English sentence.',
+        answer: 'The teacher encouraged the students to ask questions.',
+        options: [
+          'The teacher encouraged the students to ask questions.',
+          'The teacher encouraged to students ask questions.',
+          'Teacher encourage students for asking question.',
+        ],
+      ),
     ];
-    return challenges[_random.nextInt(challenges.length)];
+    _lastSentenceIndex = _nextDifferentIndex(
+      challenges.length,
+      _lastSentenceIndex,
+    );
+    return challenges[_lastSentenceIndex];
+  }
+
+  _SpellingBeeQuestion _nextSpellingBeeQuestion() {
+    const questions = [
+      _SpellingBeeQuestion(
+        prompt: 'Choose the correct spelling.',
+        answer: 'journalist',
+        options: ['journalist', 'journelist', 'jornalist', 'journalisst'],
+      ),
+      _SpellingBeeQuestion(
+        prompt: 'Choose the correct spelling.',
+        answer: 'government',
+        options: ['goverment', 'governmant', 'government', 'govarnment'],
+      ),
+      _SpellingBeeQuestion(
+        prompt: 'Choose the correct spelling.',
+        answer: 'language',
+        options: ['langauge', 'language', 'langwage', 'languadge'],
+      ),
+      _SpellingBeeQuestion(
+        prompt: 'Choose the correct spelling.',
+        answer: 'independent',
+        options: ['independant', 'independent', 'independet', 'indepandent'],
+      ),
+      _SpellingBeeQuestion(
+        prompt: 'Choose the correct spelling.',
+        answer: 'responsible',
+        options: ['responsibel', 'responsible', 'responsable', 'responcible'],
+      ),
+      _SpellingBeeQuestion(
+        prompt: 'Choose the correct spelling.',
+        answer: 'education',
+        options: ['educasion', 'educatoin', 'education', 'eduction'],
+      ),
+    ];
+    _lastSpellingIndex = _nextDifferentIndex(
+      questions.length,
+      _lastSpellingIndex,
+    );
+    return questions[_lastSpellingIndex];
+  }
+
+  _CrosswordPuzzle _nextCrosswordPuzzle() {
+    const puzzles = [
+      _CrosswordPuzzle(
+        clue: 'A newspaper opinion piece',
+        answer: 'editorial',
+      ),
+      _CrosswordPuzzle(
+        clue: 'The main title of a news story',
+        answer: 'headline',
+      ),
+      _CrosswordPuzzle(
+        clue: 'Rules that help language make sense',
+        answer: 'grammar',
+      ),
+      _CrosswordPuzzle(
+        clue: 'A careful study of a topic',
+        answer: 'analysis',
+      ),
+      _CrosswordPuzzle(
+        clue: 'A prediction of future conditions',
+        answer: 'forecast',
+      ),
+      _CrosswordPuzzle(
+        clue: 'A person who reports the news',
+        answer: 'journalist',
+      ),
+    ];
+    _lastCrosswordIndex = _nextDifferentIndex(
+      puzzles.length,
+      _lastCrosswordIndex,
+    );
+    return puzzles[_lastCrosswordIndex];
   }
 }
 
@@ -644,4 +1074,23 @@ class _SentenceChallenge {
   final String prompt;
   final String answer;
   final List<String> options;
+}
+
+class _SpellingBeeQuestion {
+  const _SpellingBeeQuestion({
+    required this.prompt,
+    required this.answer,
+    required this.options,
+  });
+
+  final String prompt;
+  final String answer;
+  final List<String> options;
+}
+
+class _CrosswordPuzzle {
+  const _CrosswordPuzzle({required this.clue, required this.answer});
+
+  final String clue;
+  final String answer;
 }

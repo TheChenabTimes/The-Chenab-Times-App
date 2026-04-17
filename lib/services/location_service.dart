@@ -128,6 +128,7 @@ class LocationService extends ChangeNotifier {
         _country = place.country;
       }
 
+      await _enrichFromNetworkReverseGeocoding(position.latitude, position.longitude);
       await _fetchWeather(position.latitude, position.longitude);
       await _persist();
     } catch (e) {
@@ -155,6 +156,55 @@ class LocationService extends ChangeNotifier {
     final code = current['weather_code'];
     if (temp is num) _temperature = temp.toDouble();
     if (code is num) _weatherLabel = _weatherLabelForCode(code.toInt());
+  }
+
+  Future<void> _enrichFromNetworkReverseGeocoding(
+    double latitude,
+    double longitude,
+  ) async {
+    try {
+      final uri = Uri.parse(
+        'https://nominatim.openstreetmap.org/reverse'
+        '?lat=$latitude&lon=$longitude&format=jsonv2&accept-language=en',
+      );
+
+      final response = await http.get(
+        uri,
+        headers: const {
+          'User-Agent': 'The-Chenab-Times-App/1.0',
+          'Accept': 'application/json',
+        },
+      ).timeout(const Duration(seconds: 15));
+      if (response.statusCode != 200) return;
+
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      final address = data['address'] as Map<String, dynamic>? ?? {};
+
+      _city = _pickFirstNonEmpty([
+        address['town']?.toString(),
+        address['city']?.toString(),
+        address['municipality']?.toString(),
+        address['village']?.toString(),
+        _city,
+      ]);
+      _district = _pickFirstNonEmpty([
+        address['county']?.toString(),
+        address['state_district']?.toString(),
+        address['region']?.toString(),
+        _district,
+      ]);
+      _state = _pickFirstNonEmpty([
+        address['state']?.toString(),
+        address['territory']?.toString(),
+        _state,
+      ]);
+      _country = _pickFirstNonEmpty([
+        address['country']?.toString(),
+        _country,
+      ]);
+    } catch (_) {
+      // Keep the platform geocoder result when the network lookup is unavailable.
+    }
   }
 
   Future<WeatherForecast?> fetchWeatherForecast({int days = 3}) async {

@@ -10,6 +10,7 @@ class Article {
   final String? link;
   final String? author;
   final DateTime? date;
+  final List<int> categoryIds;
 
   Article({
     this.id,
@@ -21,6 +22,7 @@ class Article {
     this.link,
     this.author,
     this.date,
+    this.categoryIds = const [],
   });
 
   factory Article.fromJson(Map<String, dynamic> json) {
@@ -87,6 +89,21 @@ class Article {
         log('Error parsing author name: $e');
     }
 
+    final parsedCategories = <int>[];
+    final rawCategories = json['categories'];
+    if (rawCategories is List) {
+      for (final category in rawCategories) {
+        if (category is int) {
+          parsedCategories.add(category);
+        } else if (category is String) {
+          final parsed = int.tryParse(category);
+          if (parsed != null) {
+            parsedCategories.add(parsed);
+          }
+        }
+      }
+    }
+
     return Article(
       id: parsedId,
       title: getRendered(json['title']),
@@ -97,6 +114,7 @@ class Article {
       link: json['link'] as String?,
       author: authorName ?? json['author_name'] ?? json['author'] as String?,
       date: json['date'] != null ? DateTime.tryParse(json['date'].toString()) : null,
+      categoryIds: parsedCategories,
     );
   }
 
@@ -129,5 +147,8 @@ class Article {
     };
   }
 
-  Map<String, dynamic> toJson() => toMap();
+  Map<String, dynamic> toJson() => {
+    ...toMap(),
+    'categories': categoryIds,
+  };
 }
