@@ -15,9 +15,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Settings'),
-      ),
+      appBar: AppBar(title: const Text('Settings')),
       body: Consumer2<ThemeService, LanguageService>(
         builder: (context, themeService, languageService, child) {
           final currentTheme = _getThemeString(themeService.themeMode);
@@ -37,10 +35,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 title: const Text('Language'),
                 subtitle: Text(currentLang),
                 onTap: () {
-                  Navigator.of(context).push(MaterialPageRoute(
-                    builder: (_) =>
-                        const LanguageSelectionScreen(isInitialSetup: false),
-                  ));
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) =>
+                          const LanguageSelectionScreen(isInitialSetup: false),
+                    ),
+                  );
                 },
               ),
             ],
@@ -88,51 +88,56 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _showThemeDialog(
-      BuildContext context, ThemeService themeService) async {
+    BuildContext context,
+    ThemeService themeService,
+  ) async {
     await showDialog<void>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
-            title: const Text('Select Theme'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                RadioListTile<ThemeMode>(
-                  title: const Text('Light'),
-                  value: ThemeMode.light,
-                  groupValue: themeService.themeMode,
-                  onChanged: (ThemeMode? value) {
-                    if (value != null) {
-                      themeService.setTheme(value);
-                      Navigator.of(context).pop();
-                    }
-                  },
-                ),
-                RadioListTile<ThemeMode>(
-                  title: const Text('Dark'),
-                  value: ThemeMode.dark,
-                  groupValue: themeService.themeMode,
-                  onChanged: (ThemeMode? value) {
-                    if (value != null) {
-                      themeService.setTheme(value);
-                      Navigator.of(context).pop();
-                    }
-                  },
-                ),
-                RadioListTile<ThemeMode>(
-                  title: const Text('System Default'),
-                  value: ThemeMode.system,
-                  groupValue: themeService.themeMode,
-                  onChanged: (ThemeMode? value) {
-                    if (value != null) {
-                      themeService.setTheme(value);
-                      Navigator.of(context).pop();
-                    }
-                  },
-                ),
-              ],
-            ));
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15.0),
+          ),
+          title: const Text('Select Theme'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              RadioListTile<ThemeMode>(
+                title: const Text('Light'),
+                value: ThemeMode.light,
+                groupValue: themeService.themeMode,
+                onChanged: (ThemeMode? value) {
+                  if (value != null) {
+                    themeService.setTheme(value);
+                    Navigator.of(context).pop();
+                  }
+                },
+              ),
+              RadioListTile<ThemeMode>(
+                title: const Text('Dark'),
+                value: ThemeMode.dark,
+                groupValue: themeService.themeMode,
+                onChanged: (ThemeMode? value) {
+                  if (value != null) {
+                    themeService.setTheme(value);
+                    Navigator.of(context).pop();
+                  }
+                },
+              ),
+              RadioListTile<ThemeMode>(
+                title: const Text('System Default'),
+                value: ThemeMode.system,
+                groupValue: themeService.themeMode,
+                onChanged: (ThemeMode? value) {
+                  if (value != null) {
+                    themeService.setTheme(value);
+                    Navigator.of(context).pop();
+                  }
+                },
+              ),
+            ],
+          ),
+        );
       },
     );
   }

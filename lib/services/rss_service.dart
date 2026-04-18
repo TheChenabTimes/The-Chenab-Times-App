@@ -36,11 +36,14 @@ class RssService {
     final uri = Uri.tryParse(url);
     if (uri == null) return null;
 
-    final segments = uri.pathSegments.where((segment) => segment.isNotEmpty).toList();
+    final segments = uri.pathSegments
+        .where((segment) => segment.isNotEmpty)
+        .toList();
     if (segments.isEmpty) return null;
 
     final slug = segments.last;
-    var requestUrl = '$postsBaseUrl?slug=${Uri.encodeQueryComponent(slug)}&_embed=true&per_page=1';
+    var requestUrl =
+        '$postsBaseUrl?slug=${Uri.encodeQueryComponent(slug)}&_embed=true&per_page=1';
     if (languageCode != null && languageCode != 'en') {
       requestUrl += '&lang=$languageCode';
     }

@@ -20,7 +20,12 @@ class DatabaseService {
   Future<Database> _initDB() async {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, 'the_chenab_times.db');
-    return await openDatabase(path, version: 7, onCreate: _onCreate, onUpgrade: _onUpgrade);
+    return await openDatabase(
+      path,
+      version: 7,
+      onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
+    );
   }
 
   Future<void> _onCreate(Database db, int version) async {
@@ -38,7 +43,9 @@ class DatabaseService {
       ''');
     }
     if (oldVersion < 3) {
-      await db.execute('ALTER TABLE saved_articles ADD COLUMN thumbnailUrl TEXT');
+      await db.execute(
+        'ALTER TABLE saved_articles ADD COLUMN thumbnailUrl TEXT',
+      );
       await db.execute('ALTER TABLE saved_articles ADD COLUMN author TEXT');
       await db.execute('ALTER TABLE saved_articles ADD COLUMN date INTEGER');
     }
@@ -53,7 +60,9 @@ class DatabaseService {
       await _createNotificationsTable(db);
     }
     if (oldVersion < 6) {
-      await db.execute('CREATE TABLE IF NOT EXISTS summary_cache(id INTEGER PRIMARY KEY AUTOINCREMENT, article_link TEXT NOT NULL UNIQUE, summary TEXT NOT NULL, cached_at INTEGER NOT NULL)');
+      await db.execute(
+        'CREATE TABLE IF NOT EXISTS summary_cache(id INTEGER PRIMARY KEY AUTOINCREMENT, article_link TEXT NOT NULL UNIQUE, summary TEXT NOT NULL, cached_at INTEGER NOT NULL)',
+      );
     }
     if (oldVersion < 7) {
       await db.execute('ALTER TABLE notifications ADD COLUMN post_id INTEGER');
@@ -87,7 +96,9 @@ class DatabaseService {
     )
     ''');
     await _createNotificationsTable(db);
-    await db.execute('CREATE TABLE IF NOT EXISTS summary_cache(id INTEGER PRIMARY KEY AUTOINCREMENT, article_link TEXT NOT NULL UNIQUE, summary TEXT NOT NULL, cached_at INTEGER NOT NULL)');
+    await db.execute(
+      'CREATE TABLE IF NOT EXISTS summary_cache(id INTEGER PRIMARY KEY AUTOINCREMENT, article_link TEXT NOT NULL UNIQUE, summary TEXT NOT NULL, cached_at INTEGER NOT NULL)',
+    );
   }
 
   Future<void> _createNotificationsTable(Database db) async {
@@ -108,12 +119,20 @@ class DatabaseService {
   // User Methods
   Future<int> createUser(User user) async {
     final db = await database;
-    return await db.insert('users', user.toMap(), conflictAlgorithm: ConflictAlgorithm.fail);
+    return await db.insert(
+      'users',
+      user.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.fail,
+    );
   }
 
   Future<User?> getUser(String username) async {
     final db = await database;
-    final List<Map<String, dynamic>> maps = await db.query('users', where: 'username = ?', whereArgs: [username]);
+    final List<Map<String, dynamic>> maps = await db.query(
+      'users',
+      where: 'username = ?',
+      whereArgs: [username],
+    );
     if (maps.isNotEmpty) {
       return User.fromMap(maps.first);
     }
@@ -122,20 +141,29 @@ class DatabaseService {
 
   Future<int> updateUser(User user) async {
     final db = await database;
-    return await db.update('users', user.toMap(), where: 'id = ?', whereArgs: [user.id]);
+    return await db.update(
+      'users',
+      user.toMap(),
+      where: 'id = ?',
+      whereArgs: [user.id],
+    );
   }
 
   // Article Methods
   Future<void> saveArticle(Article article) async {
     final db = await database;
-    await db.insert('saved_articles', article.toMap(), conflictAlgorithm: ConflictAlgorithm.replace);
+    await db.insert(
+      'saved_articles',
+      article.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
   }
 
   Future<void> deleteSavedArticle(int id) async {
     final db = await database;
     await db.delete('saved_articles', where: 'id = ?', whereArgs: [id]);
   }
-  
+
   Future<void> deleteAllSavedArticles() async {
     final db = await database;
     await db.delete('saved_articles');
@@ -150,20 +178,34 @@ class DatabaseService {
   Future<bool> isArticleSaved(String? link) async {
     if (link == null) return false;
     final db = await database;
-    final List<Map<String, dynamic>> maps = await db.query('saved_articles', where: 'link = ?', whereArgs: [link]);
+    final List<Map<String, dynamic>> maps = await db.query(
+      'saved_articles',
+      where: 'link = ?',
+      whereArgs: [link],
+    );
     return maps.isNotEmpty;
   }
 
   // Notification Methods
   Future<void> saveNotification(NotificationModel notification) async {
     final db = await database;
-    await db.insert('notifications', notification.toMap(), conflictAlgorithm: ConflictAlgorithm.replace);
+    await db.insert(
+      'notifications',
+      notification.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
   }
 
   Future<List<NotificationModel>> getNotifications() async {
     final db = await database;
-    final List<Map<String, dynamic>> maps = await db.query('notifications', orderBy: 'received_at DESC');
-    return List.generate(maps.length, (i) => NotificationModel.fromMap(maps[i]));
+    final List<Map<String, dynamic>> maps = await db.query(
+      'notifications',
+      orderBy: 'received_at DESC',
+    );
+    return List.generate(
+      maps.length,
+      (i) => NotificationModel.fromMap(maps[i]),
+    );
   }
 
   Future<void> deleteAllNotifications() async {
@@ -175,20 +217,37 @@ class DatabaseService {
     final db = await database;
     await db.delete('notifications', where: 'id = ?', whereArgs: [id]);
   }
+
   // Summary Cache Methods
   Future<String?> getCachedSummary(String articleLink) async {
     final db = await database;
-    final maps = await db.query("summary_cache", where: "article_link = ?", whereArgs: [articleLink]);
+    final maps = await db.query(
+      "summary_cache",
+      where: "article_link = ?",
+      whereArgs: [articleLink],
+    );
     if (maps.isNotEmpty) return maps.first["summary"] as String?;
     return null;
   }
+
   Future<void> cacheSummary(String articleLink, String summary) async {
     final db = await database;
-    await db.insert("summary_cache", {"article_link": articleLink, "summary": summary, "cached_at": DateTime.now().millisecondsSinceEpoch}, conflictAlgorithm: ConflictAlgorithm.replace);
+    await db.insert("summary_cache", {
+      "article_link": articleLink,
+      "summary": summary,
+      "cached_at": DateTime.now().millisecondsSinceEpoch,
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
+
   Future<void> clearOldSummaryCache() async {
     final db = await database;
-    final cutoff = DateTime.now().subtract(const Duration(days: 7)).millisecondsSinceEpoch;
-    await db.delete("summary_cache", where: "cached_at < ?", whereArgs: [cutoff]);
+    final cutoff = DateTime.now()
+        .subtract(const Duration(days: 7))
+        .millisecondsSinceEpoch;
+    await db.delete(
+      "summary_cache",
+      where: "cached_at < ?",
+      whereArgs: [cutoff],
+    );
   }
 }

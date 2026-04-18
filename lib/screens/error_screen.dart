@@ -4,11 +4,7 @@ class ErrorScreen extends StatelessWidget {
   final String message;
   final VoidCallback onRetry;
 
-  const ErrorScreen({
-    super.key,
-    required this.message,
-    required this.onRetry,
-  });
+  const ErrorScreen({super.key, required this.message, required this.onRetry});
 
   static void show(BuildContext context, String message, VoidCallback onRetry) {
     showDialog(
@@ -29,9 +25,9 @@ class ErrorScreen extends StatelessWidget {
               const SizedBox(height: 16),
               Text(
                 "Connection Error",
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
               Text(
@@ -87,8 +83,8 @@ class ErrorScreen extends StatelessWidget {
               message,
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).textTheme.bodySmall?.color,
-                  ),
+                color: Theme.of(context).textTheme.bodySmall?.color,
+              ),
             ),
           ),
           const SizedBox(height: 24),

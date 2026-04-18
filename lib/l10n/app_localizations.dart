@@ -39,7 +39,8 @@ class AppLocalizations {
       'login_restore': 'लॉगिन या बैकअप से पुनर्स्थापित करें',
       'terms_title': 'नियम और शर्तें',
       'terms_agreement': 'मैं सेवा की शर्तों से सहमत हूं।',
-      'age_agreement': 'मैं पुष्टि करता हूं कि मेरी उम्र 13 वर्ष या उससे अधिक है।',
+      'age_agreement':
+          'मैं पुष्टि करता हूं कि मेरी उम्र 13 वर्ष या उससे अधिक है।',
       'proceed': 'आगे बढ़ें',
     },
     'ur': {
@@ -54,7 +55,8 @@ class AppLocalizations {
       'login_restore': 'لاگ ان یا بیک اپ سے بحال کریں',
       'terms_title': 'شرائط و ضوابط',
       'terms_agreement': 'میں سروس کی شرائط سے اتفاق کرتا ہوں۔',
-      'age_agreement': 'میں تصدیق کرتا ہوں کہ میری عمر 13 سال یا اس سے زیادہ ہے۔',
+      'age_agreement':
+          'میں تصدیق کرتا ہوں کہ میری عمر 13 سال یا اس سے زیادہ ہے۔',
       'proceed': 'آگے بڑھیں',
     },
   };
@@ -68,7 +70,8 @@ class AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
   const AppLocalizationsDelegate();
 
   @override
-  bool isSupported(Locale locale) => ['en', 'hi', 'ur'].contains(locale.languageCode);
+  bool isSupported(Locale locale) =>
+      ['en', 'hi', 'ur'].contains(locale.languageCode);
 
   @override
   Future<AppLocalizations> load(Locale locale) {

@@ -18,7 +18,8 @@ class ArticleListItem extends StatelessWidget {
       elevation: 2,
       shadowColor: Colors.black.withOpacity(0.1),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      clipBehavior: Clip.antiAlias, // Ensures the InkWell ripple stays within the card's rounded corners
+      clipBehavior: Clip
+          .antiAlias, // Ensures the InkWell ripple stays within the card's rounded corners
       child: InkWell(
         onTap: () {
           Navigator.push(
@@ -54,7 +55,10 @@ class ArticleListItem extends StatelessWidget {
                       width: 110,
                       height: 110,
                       color: Colors.grey[200],
-                      child: const Icon(Icons.broken_image_outlined, color: Colors.grey),
+                      child: const Icon(
+                        Icons.broken_image_outlined,
+                        color: Colors.grey,
+                      ),
                     ),
                   ),
                 ),
@@ -77,10 +81,7 @@ class ArticleListItem extends StatelessWidget {
                     if (article.excerpt != null && article.excerpt!.isNotEmpty)
                       Text(
                         HtmlHelper.stripAndUnescape(article.excerpt!),
-                        style: TextStyle(
-                          color: Colors.grey[700],
-                          fontSize: 14,
-                        ),
+                        style: TextStyle(color: Colors.grey[700], fontSize: 14),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),

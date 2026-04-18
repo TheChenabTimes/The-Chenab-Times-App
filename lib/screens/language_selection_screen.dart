@@ -78,9 +78,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
                   selected: isSelected,
                   title: Text(
                     language.name,
-                    style: const TextStyle(
-                      fontSize: 18,
-                    ),
+                    style: const TextStyle(fontSize: 18),
                   ),
                   trailing: isSelected ? const Icon(Icons.check_circle) : null,
                   onTap: () {
@@ -89,8 +87,9 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
                     languageService.setLanguage(language.code);
                     if (!widget.isInitialSetup) {
                       AppStatusHandler.showStatusToast(
-                          message: 'Language changed successfully',
-                          type: StatusType.success);
+                        message: 'Language changed successfully',
+                        type: StatusType.success,
+                      );
                       Navigator.of(context).pop();
                     }
                   },

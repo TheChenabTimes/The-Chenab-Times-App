@@ -759,17 +759,29 @@ class _GamesScreenState extends State<GamesScreen> {
       _WordScramblePuzzle(answer: 'culture', hint: 'Shared way of life'),
       _WordScramblePuzzle(answer: 'economy', hint: 'System of money and trade'),
       _WordScramblePuzzle(answer: 'context', hint: 'Background meaning'),
-      _WordScramblePuzzle(answer: 'clarity', hint: 'Easy to understand quality'),
+      _WordScramblePuzzle(
+        answer: 'clarity',
+        hint: 'Easy to understand quality',
+      ),
       _WordScramblePuzzle(answer: 'feature', hint: 'A longer detailed story'),
-      _WordScramblePuzzle(answer: 'forecast', hint: 'Prediction for the future'),
+      _WordScramblePuzzle(
+        answer: 'forecast',
+        hint: 'Prediction for the future',
+      ),
       _WordScramblePuzzle(answer: 'digital', hint: 'Using computer technology'),
       _WordScramblePuzzle(answer: 'citizen', hint: 'A member of a country'),
-      _WordScramblePuzzle(answer: 'regional', hint: 'Linked to a specific area'),
+      _WordScramblePuzzle(
+        answer: 'regional',
+        hint: 'Linked to a specific area',
+      ),
       _WordScramblePuzzle(answer: 'resilient', hint: 'Able to recover quickly'),
       _WordScramblePuzzle(answer: 'diligent', hint: 'Showing careful effort'),
       _WordScramblePuzzle(answer: 'concise', hint: 'Brief but clear'),
     ];
-    _lastScrambleIndex = _nextDifferentIndex(puzzles.length, _lastScrambleIndex);
+    _lastScrambleIndex = _nextDifferentIndex(
+      puzzles.length,
+      _lastScrambleIndex,
+    );
     final selected = puzzles[_lastScrambleIndex];
     return selected.scrambledVariant(_random);
   }
@@ -809,17 +821,32 @@ class _GamesScreenState extends State<GamesScreen> {
       _VocabQuestion(
         word: 'context',
         answer: 'background meaning',
-        options: ['background meaning', 'quick answer', 'public anger', 'final result'],
+        options: [
+          'background meaning',
+          'quick answer',
+          'public anger',
+          'final result',
+        ],
       ),
       _VocabQuestion(
         word: 'insight',
         answer: 'deep understanding',
-        options: ['deep understanding', 'loud complaint', 'public holiday', 'written order'],
+        options: [
+          'deep understanding',
+          'loud complaint',
+          'public holiday',
+          'written order',
+        ],
       ),
       _VocabQuestion(
         word: 'timely',
         answer: 'at the right moment',
-        options: ['at the right moment', 'too expensive', 'hard to read', 'very distant'],
+        options: [
+          'at the right moment',
+          'too expensive',
+          'hard to read',
+          'very distant',
+        ],
       ),
       _VocabQuestion(
         word: 'inquiry',
@@ -937,10 +964,7 @@ class _GamesScreenState extends State<GamesScreen> {
 
   _CrosswordPuzzle _nextCrosswordPuzzle() {
     const puzzles = [
-      _CrosswordPuzzle(
-        clue: 'A newspaper opinion piece',
-        answer: 'editorial',
-      ),
+      _CrosswordPuzzle(clue: 'A newspaper opinion piece', answer: 'editorial'),
       _CrosswordPuzzle(
         clue: 'The main title of a news story',
         answer: 'headline',
@@ -949,10 +973,7 @@ class _GamesScreenState extends State<GamesScreen> {
         clue: 'Rules that help language make sense',
         answer: 'grammar',
       ),
-      _CrosswordPuzzle(
-        clue: 'A careful study of a topic',
-        answer: 'analysis',
-      ),
+      _CrosswordPuzzle(clue: 'A careful study of a topic', answer: 'analysis'),
       _CrosswordPuzzle(
         clue: 'A prediction of future conditions',
         answer: 'forecast',

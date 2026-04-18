@@ -6,8 +6,6 @@ import '../services/rss_service.dart';
 class AppState extends ChangeNotifier {
   final RssService _rss = RssService();
 
-
-
   NewsCategory? _selected;
   NewsCategory? get selected => _selected;
 

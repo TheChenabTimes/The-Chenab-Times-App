@@ -21,8 +21,14 @@ class _NotificationScreenState extends State<NotificationScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final provider = context.read<NotificationProvider>();
       await provider.loadNotifications();
-      final languageCode = context.read<LanguageService>().appLocale.languageCode;
-      await provider.syncLatestPosts(languageCode: languageCode, seedIfEmpty: false);
+      final languageCode = context
+          .read<LanguageService>()
+          .appLocale
+          .languageCode;
+      await provider.syncLatestPosts(
+        languageCode: languageCode,
+        seedIfEmpty: false,
+      );
       if (mounted) {
         await provider.loadNotifications();
       }
@@ -30,16 +36,17 @@ class _NotificationScreenState extends State<NotificationScreen> {
   }
 
   /// This handles what happens when you click a notification row in the list
-  Future<void> _handleNotificationClick(BuildContext context, NotificationModel notification) async {
+  Future<void> _handleNotificationClick(
+    BuildContext context,
+    NotificationModel notification,
+  ) async {
     // 1. If we already have the full article data saved, open it.
     if (notification.article != null) {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => ArticleScreen(
-            articles: [notification.article!],
-            initialIndex: 0,
-          ),
+          builder: (context) =>
+              ArticleScreen(articles: [notification.article!], initialIndex: 0),
         ),
       );
       return;
@@ -55,26 +62,28 @@ class _NotificationScreenState extends State<NotificationScreen> {
       );
 
       // Fetch from API
-      Article? fetchedArticle = await RssService().fetchArticleById(notification.postId!);
+      Article? fetchedArticle = await RssService().fetchArticleById(
+        notification.postId!,
+      );
 
       // Hide loading spinner
       if (Navigator.of(context).canPop()) {
-          Navigator.of(context).pop();
+        Navigator.of(context).pop();
       }
 
       if (fetchedArticle != null) {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => ArticleScreen(
-              articles: [fetchedArticle],
-              initialIndex: 0,
-            ),
+            builder: (context) =>
+                ArticleScreen(articles: [fetchedArticle], initialIndex: 0),
           ),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not load article. Check internet.')),
+          const SnackBar(
+            content: Text('Could not load article. Check internet.'),
+          ),
         );
       }
     } else {
@@ -88,7 +97,10 @@ class _NotificationScreenState extends State<NotificationScreen> {
   Future<void> _refreshNotifications(BuildContext context) async {
     final provider = context.read<NotificationProvider>();
     final languageCode = context.read<LanguageService>().appLocale.languageCode;
-    await provider.syncLatestPosts(languageCode: languageCode, seedIfEmpty: false);
+    await provider.syncLatestPosts(
+      languageCode: languageCode,
+      seedIfEmpty: false,
+    );
     await provider.loadNotifications();
   }
 
@@ -102,7 +114,9 @@ class _NotificationScreenState extends State<NotificationScreen> {
             builder: (context, provider, child) {
               return IconButton(
                 icon: const Icon(Icons.delete_sweep_outlined),
-                onPressed: provider.notifications.isEmpty ? null : () => provider.clearAllNotifications(),
+                onPressed: provider.notifications.isEmpty
+                    ? null
+                    : () => provider.clearAllNotifications(),
                 tooltip: 'Delete all',
               );
             },
@@ -121,7 +135,11 @@ class _NotificationScreenState extends State<NotificationScreen> {
               child: ListView(
                 children: const [
                   SizedBox(height: 180),
-                  Center(child: Text('No notifications yet. Pull down to check for new posts.')),
+                  Center(
+                    child: Text(
+                      'No notifications yet. Pull down to check for new posts.',
+                    ),
+                  ),
                 ],
               ),
             );
@@ -135,7 +153,12 @@ class _NotificationScreenState extends State<NotificationScreen> {
                 final notification = provider.notifications[index];
                 return ListTile(
                   leading: notification.imageUrl != null
-                      ? Image.network(notification.imageUrl!, width: 50, height: 50, fit: BoxFit.cover)
+                      ? Image.network(
+                          notification.imageUrl!,
+                          width: 50,
+                          height: 50,
+                          fit: BoxFit.cover,
+                        )
                       : const Icon(Icons.notifications),
                   title: Text(
                     notification.title,

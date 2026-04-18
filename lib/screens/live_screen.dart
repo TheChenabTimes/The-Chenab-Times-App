@@ -31,9 +31,7 @@ class _LiveScreenState extends State<LiveScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Live & Videos'),
-      ),
+      appBar: AppBar(title: const Text('Live & Videos')),
       body: RefreshIndicator(
         onRefresh: _refresh,
         child: SingleChildScrollView(
@@ -51,9 +49,7 @@ class _LiveScreenState extends State<LiveScreen> {
                         YoutubePlayer(
                           controller: YoutubePlayerController(
                             initialVideoId: snapshot.data!,
-                            flags: const YoutubePlayerFlags(
-                              isLive: true,
-                            ),
+                            flags: const YoutubePlayerFlags(isLive: true),
                           ),
                           showVideoProgressIndicator: true,
                         ),
@@ -89,19 +85,25 @@ class _LiveScreenState extends State<LiveScreen> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => VideoPlayerScreen(videoId: video['id']['videoId']),
+                                builder: (context) => VideoPlayerScreen(
+                                  videoId: video['id']['videoId'],
+                                ),
                               ),
                             );
                           },
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Image.network(video['snippet']['thumbnails']['high']['url']),
+                              Image.network(
+                                video['snippet']['thumbnails']['high']['url'],
+                              ),
                               Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: Text(
                                   video['snippet']['title'],
-                                  style: const TextStyle(fontWeight: FontWeight.bold),
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ),
                             ],
@@ -133,9 +135,7 @@ class VideoPlayerScreen extends StatelessWidget {
         child: YoutubePlayer(
           controller: YoutubePlayerController(
             initialVideoId: videoId,
-            flags: const YoutubePlayerFlags(
-              autoPlay: true,
-            ),
+            flags: const YoutubePlayerFlags(autoPlay: true),
           ),
           showVideoProgressIndicator: true,
         ),

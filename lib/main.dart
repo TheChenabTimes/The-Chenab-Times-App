@@ -304,8 +304,16 @@ class _MainScreenState extends State<MainScreen> {
     _notificationRefreshTimer = Timer.periodic(const Duration(minutes: 5), (_) {
       if (!mounted) return;
       final provider = context.read<NotificationProvider>();
-      final languageCode = context.read<LanguageService>().appLocale.languageCode;
-      unawaited(provider.syncLatestPosts(languageCode: languageCode, seedIfEmpty: false));
+      final languageCode = context
+          .read<LanguageService>()
+          .appLocale
+          .languageCode;
+      unawaited(
+        provider.syncLatestPosts(
+          languageCode: languageCode,
+          seedIfEmpty: false,
+        ),
+      );
     });
   }
 

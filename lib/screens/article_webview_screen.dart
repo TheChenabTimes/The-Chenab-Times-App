@@ -43,23 +43,24 @@ class _ArticleWebViewScreenState extends State<ArticleWebViewScreen> {
 
       if (article == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('This post could not be opened in short form.')),
+          const SnackBar(
+            content: Text('This post could not be opened in short form.'),
+          ),
         );
         return;
       }
 
       await Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (_) => ArticleScreen(
-            articles: [article],
-            initialIndex: 0,
-          ),
+          builder: (_) => ArticleScreen(articles: [article], initialIndex: 0),
         ),
       );
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Unable to open the short version right now.')),
+          const SnackBar(
+            content: Text('Unable to open the short version right now.'),
+          ),
         );
       }
     } finally {
@@ -112,9 +113,7 @@ class _ArticleWebViewScreenState extends State<ArticleWebViewScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Full Article'),
-      ),
+      appBar: AppBar(title: const Text('Full Article')),
       bottomNavigationBar: SafeArea(
         minimum: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         child: Row(
@@ -125,7 +124,10 @@ class _ArticleWebViewScreenState extends State<ArticleWebViewScreen> {
                   onPressed: _openingSummary ? null : _openInShort,
                   style: OutlinedButton.styleFrom(
                     foregroundColor: const Color(0xFF8C1D18),
-                    side: const BorderSide(color: Color(0xFF8C1D18), width: 1.6),
+                    side: const BorderSide(
+                      color: Color(0xFF8C1D18),
+                      width: 1.6,
+                    ),
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(18),
@@ -142,7 +144,8 @@ class _ArticleWebViewScreenState extends State<ArticleWebViewScreen> {
             ],
             Expanded(
               child: FilledButton(
-                onPressed: () => Navigator.of(context).popUntil((route) => route.isFirst),
+                onPressed: () =>
+                    Navigator.of(context).popUntil((route) => route.isFirst),
                 style: FilledButton.styleFrom(
                   backgroundColor: const Color(0xFF8C1D18),
                   foregroundColor: Colors.white,
@@ -164,9 +167,7 @@ class _ArticleWebViewScreenState extends State<ArticleWebViewScreen> {
         children: [
           WebViewWidget(controller: _controller),
           if (_loadingPercentage < 100)
-            LinearProgressIndicator(
-              value: _loadingPercentage / 100.0,
-            ),
+            LinearProgressIndicator(value: _loadingPercentage / 100.0),
         ],
       ),
     );

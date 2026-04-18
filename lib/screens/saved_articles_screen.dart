@@ -19,15 +19,19 @@ class SavedArticlesScreen extends StatelessWidget {
           if (provider.savedArticles.isEmpty) {
             return Center(
               child: Column(
-                 mainAxisAlignment: MainAxisAlignment.center,
-                 children: [
-                    const Icon(Icons.bookmark_border, size: 80, color: Colors.grey),
-                    const SizedBox(height: 16),
-                    const Text(
-                      'You haven\'t saved any articles yet.',
-                      style: TextStyle(fontSize: 18, color: Colors.grey),
-                    ),
-                 ],
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.bookmark_border,
+                    size: 80,
+                    color: Colors.grey,
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'You haven\'t saved any articles yet.',
+                    style: TextStyle(fontSize: 18, color: Colors.grey),
+                  ),
+                ],
               ),
             );
           }
@@ -55,10 +59,7 @@ class SavedArticlesScreen extends StatelessWidget {
                   color: Colors.red,
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   alignment: Alignment.centerRight,
-                  child: const Icon(
-                    Icons.delete_outline,
-                    color: Colors.white,
-                  ),
+                  child: const Icon(Icons.delete_outline, color: Colors.white),
                 ),
                 child: ArticleListItem(article: article),
               );

@@ -13,9 +13,7 @@ class MoreScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('More'),
-      ),
+      appBar: AppBar(title: const Text('More')),
       body: ListView(
         children: [
           // A list tile for the "About Us" screen.
@@ -49,7 +47,8 @@ class MoreScreen extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => const PrivacyPolicyScreen()),
+                  builder: (context) => const PrivacyPolicyScreen(),
+                ),
               );
             },
           ),
@@ -62,7 +61,8 @@ class MoreScreen extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => const TermsOfServiceScreen()),
+                  builder: (context) => const TermsOfServiceScreen(),
+                ),
               );
             },
           ),
@@ -72,7 +72,9 @@ class MoreScreen extends StatelessWidget {
             title: const Text('Share App'),
             onTap: () {
               // TODO: Replace with your app's link
-              Share.share('Check out The Chenab Times app: https://play.google.com/store/apps/details?id=com.thechenabtimes.app');
+              Share.share(
+                'Check out The Chenab Times app: https://play.google.com/store/apps/details?id=com.thechenabtimes.app',
+              );
             },
           ),
           const Divider(),
@@ -81,7 +83,9 @@ class MoreScreen extends StatelessWidget {
             title: const Text('Rate Us'),
             onTap: () {
               // TODO: Replace with your app's link
-              _launchUrl('https://play.google.com/store/apps/details?id=com.thechenabtimes.app');
+              _launchUrl(
+                'https://play.google.com/store/apps/details?id=com.thechenabtimes.app',
+              );
             },
           ),
         ],

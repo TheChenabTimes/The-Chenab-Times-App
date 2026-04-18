@@ -37,13 +37,13 @@ class SavedArticlesProvider extends ChangeNotifier {
   }
 
   Future<void> clearAll() async {
-      await _dbService.deleteAllSavedArticles();
-      _savedArticles.clear();
-      notifyListeners();
+    await _dbService.deleteAllSavedArticles();
+    _savedArticles.clear();
+    notifyListeners();
   }
 
   bool isArticleSaved(String? link) {
-      if (link == null) return false;
-      return _savedArticles.any((a) => a.link == link);
+    if (link == null) return false;
+    return _savedArticles.any((a) => a.link == link);
   }
 }

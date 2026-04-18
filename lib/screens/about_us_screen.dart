@@ -34,18 +34,29 @@ class AboutUsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('About Us'),
-      ),
+      appBar: AppBar(title: const Text('About Us')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Html(
           data: aboutUsHtml,
           style: {
-            'h1': Style(fontSize: FontSize.xxLarge, fontWeight: FontWeight.normal),
-            'h2': Style(fontSize: FontSize.xLarge, fontWeight: FontWeight.bold, margin: Margins.only(top: 16)),
-            'p': Style(fontSize: FontSize.large, lineHeight: LineHeight.em(1.5)),
-            'li': Style(fontSize: FontSize.large, lineHeight: LineHeight.em(1.5)),
+            'h1': Style(
+              fontSize: FontSize.xxLarge,
+              fontWeight: FontWeight.normal,
+            ),
+            'h2': Style(
+              fontSize: FontSize.xLarge,
+              fontWeight: FontWeight.bold,
+              margin: Margins.only(top: 16),
+            ),
+            'p': Style(
+              fontSize: FontSize.large,
+              lineHeight: LineHeight.em(1.5),
+            ),
+            'li': Style(
+              fontSize: FontSize.large,
+              lineHeight: LineHeight.em(1.5),
+            ),
             'b': Style(fontWeight: FontWeight.bold),
           },
         ),
@@ -53,4 +64,3 @@ class AboutUsScreen extends StatelessWidget {
     );
   }
 }
-

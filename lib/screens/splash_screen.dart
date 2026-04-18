@@ -25,7 +25,8 @@ class _SplashScreenState extends State<SplashScreen> {
 
     try {
       final prefs = await SharedPreferences.getInstance();
-      final bool onboardingComplete = prefs.getBool('onboarding_complete') ?? false;
+      final bool onboardingComplete =
+          prefs.getBool('onboarding_complete') ?? false;
 
       if (!mounted) return;
 
@@ -37,7 +38,9 @@ class _SplashScreenState extends State<SplashScreen> {
       } else {
         // First time user -> Go to Language Selection
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const LanguageSelectionScreen(isInitialSetup: true)),
+          MaterialPageRoute(
+            builder: (_) => const LanguageSelectionScreen(isInitialSetup: true),
+          ),
         );
       }
     } catch (e) {
@@ -45,7 +48,9 @@ class _SplashScreenState extends State<SplashScreen> {
       // Fallback -> Go to Language Selection
       if (mounted) {
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const LanguageSelectionScreen(isInitialSetup: true)),
+          MaterialPageRoute(
+            builder: (_) => const LanguageSelectionScreen(isInitialSetup: true),
+          ),
         );
       }
     }
@@ -60,11 +65,7 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset(
-              'lib/images/appIco.png',
-              height: 150,
-              width: 150,
-            ),
+            Image.asset('lib/images/appIco.png', height: 150, width: 150),
           ],
         ),
       ),

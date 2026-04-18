@@ -11,7 +11,8 @@ class DonateScreen extends StatefulWidget {
 }
 
 class _DonateScreenState extends State<DonateScreen> {
-  static const String _createOrderUrl = 'https://api.thechenabtimes.com/payment.php';
+  static const String _createOrderUrl =
+      'https://api.thechenabtimes.com/payment.php';
   static const String _verifyPaymentUrl =
       'https://api.thechenabtimes.com/payment_verify.php';
 
@@ -43,7 +44,8 @@ class _DonateScreenState extends State<DonateScreen> {
     _showStatusDialog(
       isSuccess: false,
       title: 'Payment Failed',
-      message: 'We couldn\'t process your donation. Please check your connection or payment method and try again.',
+      message:
+          'We couldn\'t process your donation. Please check your connection or payment method and try again.',
     );
   }
 
@@ -52,6 +54,7 @@ class _DonateScreenState extends State<DonateScreen> {
       SnackBar(content: Text("EXTERNAL_WALLET: ${response.walletName!}")),
     );
   }
+
   Future<void> _verifyPayment(PaymentSuccessResponse response) async {
     final orderId = response.orderId ?? _pendingOrderId;
     final paymentId = response.paymentId;
@@ -61,7 +64,8 @@ class _DonateScreenState extends State<DonateScreen> {
       _showStatusDialog(
         isSuccess: false,
         title: 'Verification Failed',
-        message: 'We could not verify your donation. Please contact support if money was deducted.',
+        message:
+            'We could not verify your donation. Please contact support if money was deducted.',
       );
       return;
     }
@@ -82,7 +86,8 @@ class _DonateScreenState extends State<DonateScreen> {
           .timeout(const Duration(seconds: 20));
 
       final Map<String, dynamic> data = jsonDecode(verifyResponse.body);
-      final isVerified = verifyResponse.statusCode == 200 &&
+      final isVerified =
+          verifyResponse.statusCode == 200 &&
           (data["verified"] == true ||
               data["success"] == true ||
               data["status"] == "verified" ||
@@ -105,7 +110,8 @@ class _DonateScreenState extends State<DonateScreen> {
       _showStatusDialog(
         isSuccess: false,
         title: 'Verification Failed',
-        message: data["message"]?.toString() ??
+        message:
+            data["message"]?.toString() ??
             'Your payment could not be verified. Please contact support if money was deducted.',
       );
     } catch (e) {
@@ -157,13 +163,14 @@ class _DonateScreenState extends State<DonateScreen> {
     }
   }
 
-
   Future<void> _showAmountDialog() async {
     return showDialog<void>(
       context: context,
       builder: (BuildContext context) {
         return Dialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20.0),
+          ),
           child: StatefulBuilder(
             builder: (context, setDialogState) {
               return Container(
@@ -173,14 +180,20 @@ class _DonateScreenState extends State<DonateScreen> {
                   children: <Widget>[
                     const Text(
                       'Enter Donation Amount',
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 24),
                     TextField(
                       controller: _amountController,
                       keyboardType: TextInputType.number,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
                       decoration: InputDecoration(
                         hintText: 'e.g. 100',
                         border: OutlineInputBorder(
@@ -196,13 +209,17 @@ class _DonateScreenState extends State<DonateScreen> {
                       children: [100, 500, 1000].map((amount) {
                         return OutlinedButton(
                           onPressed: () {
-                            int currentAmount = int.tryParse(_amountController.text) ?? 0;
+                            int currentAmount =
+                                int.tryParse(_amountController.text) ?? 0;
                             setDialogState(() {
-                              _amountController.text = (currentAmount + amount).toString();
+                              _amountController.text = (currentAmount + amount)
+                                  .toString();
                             });
                           },
                           style: OutlinedButton.styleFrom(
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
                           ),
                           child: Text('+ ₹$amount'),
                         );
@@ -221,7 +238,10 @@ class _DonateScreenState extends State<DonateScreen> {
                     ),
                     const SizedBox(height: 16),
                     TextButton(
-                      child: const Text('Cancel', style: TextStyle(fontSize: 16, color: Colors.grey)),
+                      child: const Text(
+                        'Cancel',
+                        style: TextStyle(fontSize: 16, color: Colors.grey),
+                      ),
                       onPressed: () => Navigator.of(context).pop(),
                     ),
                   ],
@@ -234,14 +254,19 @@ class _DonateScreenState extends State<DonateScreen> {
     );
   }
 
-  Future<void> _showStatusDialog(
-      {required bool isSuccess, required String title, required String message}) async {
+  Future<void> _showStatusDialog({
+    required bool isSuccess,
+    required String title,
+    required String message,
+  }) async {
     return showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
         return Dialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20.0),
+          ),
           child: Padding(
             padding: const EdgeInsets.all(24.0),
             child: Column(
@@ -250,7 +275,9 @@ class _DonateScreenState extends State<DonateScreen> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: isSuccess ? Colors.green.shade100 : Colors.red.shade100,
+                    color: isSuccess
+                        ? Colors.green.shade100
+                        : Colors.red.shade100,
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
@@ -262,7 +289,10 @@ class _DonateScreenState extends State<DonateScreen> {
                 const SizedBox(height: 24),
                 Text(
                   title,
-                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 12),
                 Text(
@@ -274,10 +304,18 @@ class _DonateScreenState extends State<DonateScreen> {
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: isSuccess ? Colors.green : Colors.red,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 50,
+                      vertical: 12,
+                    ),
                   ),
-                  child: const Text('Close', style: TextStyle(fontSize: 16, color: Colors.white)),
+                  child: const Text(
+                    'Close',
+                    style: TextStyle(fontSize: 16, color: Colors.white),
+                  ),
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
@@ -311,13 +349,19 @@ class _DonateScreenState extends State<DonateScreen> {
             CircleAvatar(
               radius: 40,
               backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
-              child: Icon(Icons.volunteer_activism, color: theme.colorScheme.primary, size: 40),
+              child: Icon(
+                Icons.volunteer_activism,
+                color: theme.colorScheme.primary,
+                size: 40,
+              ),
             ),
             const SizedBox(height: 20),
             Text(
               'Support Independent Journalism',
               textAlign: TextAlign.center,
-              style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+              style: theme.textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
@@ -356,7 +400,10 @@ class _DonateScreenState extends State<DonateScreen> {
         child: ElevatedButton.icon(
           onPressed: _showAmountDialog,
           icon: const Icon(Icons.favorite, color: Colors.white),
-          label: const Text('Donate Now', style: TextStyle(color: Colors.white, fontSize: 18)),
+          label: const Text(
+            'Donate Now',
+            style: TextStyle(color: Colors.white, fontSize: 18),
+          ),
           style: ElevatedButton.styleFrom(
             backgroundColor: theme.colorScheme.primary,
             padding: const EdgeInsets.symmetric(vertical: 15),
@@ -391,25 +438,33 @@ class _DonateScreenState extends State<DonateScreen> {
               children: [
                 Icon(icon, color: theme.colorScheme.primary),
                 const SizedBox(width: 12),
-                Text(title, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+                Text(
+                  title,
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 12),
             if (content != null)
               Text(content, style: theme.textTheme.bodyMedium),
             if (items != null)
-              ...items.map((item) => Padding(
-                    padding: const EdgeInsets.only(bottom: 8.0),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Icon(Icons.check_circle, color: Colors.green, size: 20),
-                        const SizedBox(width: 8),
-                        Expanded(
-                            child: Text(item, style: theme.textTheme.bodyMedium)),
-                      ],
-                    ),
-                  )),
+              ...items.map(
+                (item) => Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(Icons.check_circle, color: Colors.green, size: 20),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(item, style: theme.textTheme.bodyMedium),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
           ],
         ),
       ),

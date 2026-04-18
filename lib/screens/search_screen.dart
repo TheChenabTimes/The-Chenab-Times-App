@@ -32,20 +32,30 @@ class _SearchScreenState extends State<SearchScreen> {
       _results = [];
     });
 
-    final languageCode = Provider.of<LanguageService>(context, listen: false).appLocale.languageCode;
+    final languageCode = Provider.of<LanguageService>(
+      context,
+      listen: false,
+    ).appLocale.languageCode;
 
     try {
-      final res = await _rss.searchPosts(q, page: 1, perPage: 50, languageCode: languageCode);
+      final res = await _rss.searchPosts(
+        q,
+        page: 1,
+        perPage: 50,
+        languageCode: languageCode,
+      );
       if (mounted) {
         setState(() => _results = res);
         if (res.isNotEmpty) {
           AppStatusHandler.showStatusToast(
-              message: "Found ${res.length} articles.",
-              type: StatusType.success);
+            message: "Found ${res.length} articles.",
+            type: StatusType.success,
+          );
         } else {
           AppStatusHandler.showStatusToast(
-              message: "No articles found for your search.",
-              type: StatusType.warning);
+            message: "No articles found for your search.",
+            type: StatusType.warning,
+          );
         }
       }
     } catch (e) {
@@ -67,9 +77,7 @@ class _SearchScreenState extends State<SearchScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Search Articles'),
-      ),
+      appBar: AppBar(title: const Text('Search Articles')),
       body: Column(
         children: [
           Padding(
@@ -85,7 +93,9 @@ class _SearchScreenState extends State<SearchScreen> {
                   borderSide: BorderSide.none,
                 ),
                 filled: true,
-                fillColor: theme.brightness == Brightness.dark ? Colors.grey[800] : Colors.grey[200],
+                fillColor: theme.brightness == Brightness.dark
+                    ? Colors.grey[800]
+                    : Colors.grey[200],
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 20,
                   vertical: 15,
@@ -94,9 +104,7 @@ class _SearchScreenState extends State<SearchScreen> {
               onSubmitted: (_) => _doSearch(),
             ),
           ),
-          Expanded(
-            child: _buildResultsList(theme),
-          ),
+          Expanded(child: _buildResultsList(theme)),
         ],
       ),
     );
@@ -114,7 +122,10 @@ class _SearchScreenState extends State<SearchScreen> {
           children: [
             Icon(Icons.search, size: 80, color: Colors.grey),
             SizedBox(height: 16),
-            Text('Search for articles...', style: TextStyle(fontSize: 18, color: Colors.grey)),
+            Text(
+              'Search for articles...',
+              style: TextStyle(fontSize: 18, color: Colors.grey),
+            ),
           ],
         ),
       );
@@ -127,7 +138,10 @@ class _SearchScreenState extends State<SearchScreen> {
           children: [
             Icon(Icons.search_off, size: 80, color: Colors.grey),
             SizedBox(height: 16),
-            Text('No articles found', style: TextStyle(fontSize: 18, color: Colors.grey)),
+            Text(
+              'No articles found',
+              style: TextStyle(fontSize: 18, color: Colors.grey),
+            ),
           ],
         ),
       );
@@ -139,12 +153,17 @@ class _SearchScreenState extends State<SearchScreen> {
         final article = _results[idx];
         return GestureDetector(
           onTap: () => Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => ArticleScreen(articles: _results, initialIndex: idx)),
+            MaterialPageRoute(
+              builder: (_) =>
+                  ArticleScreen(articles: _results, initialIndex: idx),
+            ),
           ),
           child: Card(
             margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             elevation: 3,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
             child: Row(
               children: [
                 if (article.imageUrl != null)
@@ -160,13 +179,23 @@ class _SearchScreenState extends State<SearchScreen> {
                       fit: BoxFit.cover,
                       loadingBuilder: (context, child, loadingProgress) {
                         if (loadingProgress == null) return child;
-                        return Center(child: Lottie.asset('assets/loading.json', width: 50, height: 50));
+                        return Center(
+                          child: Lottie.asset(
+                            'assets/loading.json',
+                            width: 50,
+                            height: 50,
+                          ),
+                        );
                       },
                       errorBuilder: (c, e, s) => Container(
                         width: 100,
                         height: 100,
                         color: theme.scaffoldBackgroundColor,
-                        child: const Icon(Icons.broken_image, size: 40, color: Colors.grey),
+                        child: const Icon(
+                          Icons.broken_image,
+                          size: 40,
+                          color: Colors.grey,
+                        ),
                       ),
                     ),
                   )
@@ -181,7 +210,11 @@ class _SearchScreenState extends State<SearchScreen> {
                         bottomLeft: Radius.circular(12),
                       ),
                     ),
-                    child: const Icon(Icons.image_not_supported, size: 40, color: Colors.grey),
+                    child: const Icon(
+                      Icons.image_not_supported,
+                      size: 40,
+                      color: Colors.grey,
+                    ),
                   ),
                 Expanded(
                   child: Padding(
@@ -193,14 +226,18 @@ class _SearchScreenState extends State<SearchScreen> {
                           HtmlHelper.stripAndUnescape(article.title ?? ''),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.titleMedium?.copyWith(fontSize: 16),
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontSize: 16,
+                          ),
                         ),
                         const SizedBox(height: 8),
                         Text(
                           HtmlHelper.stripAndUnescape(article.excerpt ?? ''),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.bodySmall?.copyWith(fontSize: 14),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            fontSize: 14,
+                          ),
                         ),
                       ],
                     ),
@@ -216,11 +253,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
   Widget _buildSkeletonLoader() {
     return Center(
-      child: Lottie.asset(
-        'assets/loading.json',
-        width: 150,
-        height: 150,
-      ),
+      child: Lottie.asset('assets/loading.json', width: 150, height: 150),
     );
   }
 }

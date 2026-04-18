@@ -34,9 +34,7 @@ class _TermsAndConditionsScreenState extends State<TermsAndConditionsScreen> {
     final localizations = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(localizations.translate('terms_title')),
-      ),
+      appBar: AppBar(title: Text(localizations.translate('terms_title'))),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -48,10 +46,7 @@ class _TermsAndConditionsScreenState extends State<TermsAndConditionsScreen> {
                 children: [
                   const Text(
                     "Terms of Service – The Chenab Times App",
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
                   const Text(
@@ -64,10 +59,7 @@ class _TermsAndConditionsScreenState extends State<TermsAndConditionsScreen> {
                   const SizedBox(height: 20),
                   const Text(
                     "1. Use of the App",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(height: 8),
                   const Text(
@@ -78,10 +70,7 @@ class _TermsAndConditionsScreenState extends State<TermsAndConditionsScreen> {
                   const SizedBox(height: 20),
                   const Text(
                     "2. Content",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(height: 8),
                   const Text(

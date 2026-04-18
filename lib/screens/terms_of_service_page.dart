@@ -6,21 +6,15 @@ class TermsOfServicePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Terms of Service"),
-      ),
+      appBar: AppBar(title: const Text("Terms of Service")),
       body: const SingleChildScrollView(
         padding: EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-
             Text(
               "Terms of Service – The Chenab Times App",
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
 
             SizedBox(height: 16),
@@ -38,10 +32,7 @@ class TermsOfServicePage extends StatelessWidget {
             // Section 1
             Text(
               "1. Use of the App",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
             SizedBox(height: 8),
             Text(
@@ -55,10 +46,7 @@ class TermsOfServicePage extends StatelessWidget {
             // Section 2
             Text(
               "2. Content",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
             SizedBox(height: 8),
             Text(
@@ -74,10 +62,7 @@ class TermsOfServicePage extends StatelessWidget {
             // Section 3
             Text(
               "3. User Account & Saved Articles",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
             SizedBox(height: 8),
             Text(
@@ -92,10 +77,7 @@ class TermsOfServicePage extends StatelessWidget {
             // Section 4
             Text(
               "4. Prohibited Conduct",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
             SizedBox(height: 8),
             Text(
@@ -111,10 +93,7 @@ class TermsOfServicePage extends StatelessWidget {
             // Section 5
             Text(
               "5. Termination",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
             SizedBox(height: 8),
             Text(
@@ -127,10 +106,7 @@ class TermsOfServicePage extends StatelessWidget {
             // Section 6
             Text(
               "6. Limitation of Liability",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
             SizedBox(height: 8),
             Text(
@@ -145,10 +121,7 @@ class TermsOfServicePage extends StatelessWidget {
             // Section 7
             Text(
               "7. Governing Law",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
             SizedBox(height: 8),
             Text(
@@ -162,10 +135,7 @@ class TermsOfServicePage extends StatelessWidget {
             // Section 8
             Text(
               "8. Changes to Terms",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
             SizedBox(height: 8),
             Text(
@@ -179,10 +149,7 @@ class TermsOfServicePage extends StatelessWidget {
             // Contact
             Text(
               "Contact: contact+legal@thechenabtimes.com",
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
             ),
 
             SizedBox(height: 30),

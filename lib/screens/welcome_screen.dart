@@ -9,7 +9,8 @@ class WelcomeScreen extends StatefulWidget {
   State<WelcomeScreen> createState() => _WelcomeScreenState();
 }
 
-class _WelcomeScreenState extends State<WelcomeScreen> with TickerProviderStateMixin {
+class _WelcomeScreenState extends State<WelcomeScreen>
+    with TickerProviderStateMixin {
   late AnimationController _headingController;
   late Animation<Offset> _headingAnimation;
 
@@ -28,28 +29,41 @@ class _WelcomeScreenState extends State<WelcomeScreen> with TickerProviderStateM
       duration: const Duration(milliseconds: 1000),
       vsync: this,
     );
-    _headingAnimation = Tween<Offset>(
-      begin: const Offset(0, -1.5), // Start above the screen
-      end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _headingController, curve: Curves.easeInOutSine));
+    _headingAnimation =
+        Tween<Offset>(
+          begin: const Offset(0, -1.5), // Start above the screen
+          end: Offset.zero,
+        ).animate(
+          CurvedAnimation(
+            parent: _headingController,
+            curve: Curves.easeInOutSine,
+          ),
+        );
 
     // 2. Logo: Scale/Fade in at the center
     _logoController = AnimationController(
       duration: const Duration(milliseconds: 1200),
       vsync: this,
     );
-    _logoAnimation = Tween<double>(begin: 0.0, end: 1.0)
-        .animate(CurvedAnimation(parent: _logoController, curve: Curves.elasticOut));
+    _logoAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _logoController, curve: Curves.elasticOut),
+    );
 
     // 3. Button: Slides up from off-screen bottom
     _buttonController = AnimationController(
       duration: const Duration(milliseconds: 800),
       vsync: this,
     );
-    _buttonAnimation = Tween<Offset>(
-      begin: const Offset(0, 2.0), // Start below the screen
-      end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _buttonController, curve: Curves.easeOutCubic));
+    _buttonAnimation =
+        Tween<Offset>(
+          begin: const Offset(0, 2.0), // Start below the screen
+          end: Offset.zero,
+        ).animate(
+          CurvedAnimation(
+            parent: _buttonController,
+            curve: Curves.easeOutCubic,
+          ),
+        );
 
     _startAnimationSequence();
   }

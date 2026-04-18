@@ -198,9 +198,7 @@ class _TermsScreenState extends State<TermsScreen> {
                     });
                   },
                 ),
-                const Expanded(
-                  child: Text('I am 13 years old or above.'),
-                ),
+                const Expanded(child: Text('I am 13 years old or above.')),
               ],
             ),
             Row(
@@ -214,7 +212,9 @@ class _TermsScreenState extends State<TermsScreen> {
                   },
                 ),
                 const Expanded(
-                  child: Text('I have read and agree to the Terms and Conditions.'),
+                  child: Text(
+                    'I have read and agree to the Terms and Conditions.',
+                  ),
                 ),
               ],
             ),

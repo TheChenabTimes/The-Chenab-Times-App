@@ -6,21 +6,15 @@ class PrivacyPolicyPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Privacy Policy"),
-      ),
+      appBar: AppBar(title: const Text("Privacy Policy")),
       body: const SingleChildScrollView(
         padding: EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-
             Text(
               "Privacy Policy – The Chenab Times App",
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
 
             SizedBox(height: 16),
@@ -37,10 +31,7 @@ class PrivacyPolicyPage extends StatelessWidget {
             // Section 1
             Text(
               "1. Information We Do NOT Collect",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
             SizedBox(height: 8),
             Text(
@@ -57,10 +48,7 @@ class PrivacyPolicyPage extends StatelessWidget {
             // Section 2
             Text(
               "2. Information We Collect (Only When You Create an Account)",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
             SizedBox(height: 8),
             Text(
@@ -76,10 +64,7 @@ class PrivacyPolicyPage extends StatelessWidget {
             // Section 3
             Text(
               "3. How We Use the Limited Data",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
             SizedBox(height: 8),
             Text(
@@ -94,10 +79,7 @@ class PrivacyPolicyPage extends StatelessWidget {
             // Section 4
             Text(
               "4. Data Storage & Security",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
             SizedBox(height: 8),
             Text(
@@ -112,10 +94,7 @@ class PrivacyPolicyPage extends StatelessWidget {
             // Section 5
             Text(
               "5. No Sharing with Third Parties",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
             SizedBox(height: 8),
             Text(
@@ -128,10 +107,7 @@ class PrivacyPolicyPage extends StatelessWidget {
             // Section 6
             Text(
               "6. Push Notifications (Optional)",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
             SizedBox(height: 8),
             Text(
@@ -144,10 +120,7 @@ class PrivacyPolicyPage extends StatelessWidget {
             // Section 7
             Text(
               "7. Children’s Privacy",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
             SizedBox(height: 8),
             Text(
@@ -161,10 +134,7 @@ class PrivacyPolicyPage extends StatelessWidget {
             // Section 8
             Text(
               "8. Changes to This Policy",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
             SizedBox(height: 8),
             Text(
@@ -176,10 +146,7 @@ class PrivacyPolicyPage extends StatelessWidget {
 
             Text(
               "Contact Us\ncontact+privacy@thechenabtimes.com",
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
             ),
 
             SizedBox(height: 30),

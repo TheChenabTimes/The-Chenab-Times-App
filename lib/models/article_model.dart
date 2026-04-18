@@ -51,8 +51,12 @@ class Article {
           }
           if (mediaItem.containsKey('media_details') &&
               (mediaItem['media_details'] as Map).containsKey('sizes') &&
-              (mediaItem['media_details']['sizes'] as Map).containsKey('thumbnail')) {
-            thumbnailImage = mediaItem['media_details']['sizes']['thumbnail']['source_url'] as String?;
+              (mediaItem['media_details']['sizes'] as Map).containsKey(
+                'thumbnail',
+              )) {
+            thumbnailImage =
+                mediaItem['media_details']['sizes']['thumbnail']['source_url']
+                    as String?;
           }
         }
       }
@@ -63,8 +67,10 @@ class Article {
     if (featuredImage == null) {
       if (json['image'] != null) {
         featuredImage = json['image'];
-      } else if (json['image_url'] != null) featuredImage = json['image_url'];
-      else if (json['imageUrl'] != null) featuredImage = json['imageUrl'];
+      } else if (json['image_url'] != null)
+        featuredImage = json['image_url'];
+      else if (json['imageUrl'] != null)
+        featuredImage = json['imageUrl'];
       thumbnailImage ??= featuredImage;
     }
 
@@ -77,16 +83,16 @@ class Article {
 
     String? authorName;
     try {
-        if (json.containsKey('_embedded') &&
-            json['_embedded'] is Map &&
-            (json['_embedded'] as Map).containsKey('author')) {
-            final authorList = json['_embedded']['author'] as List;
-            if (authorList.isNotEmpty && authorList[0] is Map) {
-                authorName = authorList[0]['name'] as String?;
-            }
+      if (json.containsKey('_embedded') &&
+          json['_embedded'] is Map &&
+          (json['_embedded'] as Map).containsKey('author')) {
+        final authorList = json['_embedded']['author'] as List;
+        if (authorList.isNotEmpty && authorList[0] is Map) {
+          authorName = authorList[0]['name'] as String?;
         }
+      }
     } catch (e) {
-        log('Error parsing author name: $e');
+      log('Error parsing author name: $e');
     }
 
     final parsedCategories = <int>[];
@@ -113,11 +119,12 @@ class Article {
       thumbnailUrl: thumbnailImage,
       link: json['link'] as String?,
       author: authorName ?? json['author_name'] ?? json['author'] as String?,
-      date: json['date'] != null ? DateTime.tryParse(json['date'].toString()) : null,
+      date: json['date'] != null
+          ? DateTime.tryParse(json['date'].toString())
+          : null,
       categoryIds: parsedCategories,
     );
   }
-
 
   factory Article.fromMap(Map<String, dynamic> map) {
     return Article(
@@ -147,8 +154,5 @@ class Article {
     };
   }
 
-  Map<String, dynamic> toJson() => {
-    ...toMap(),
-    'categories': categoryIds,
-  };
+  Map<String, dynamic> toJson() => {...toMap(), 'categories': categoryIds};
 }

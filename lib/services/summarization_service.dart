@@ -24,11 +24,13 @@ class SummarizationService {
     // Try up to 3 times with delay
     for (int attempt = 1; attempt <= 3; attempt++) {
       try {
-        final response = await http.post(
-          Uri.parse('https://api.thechenabtimes.com/summarise.php'),
-          headers: {"Content-Type": "application/json"},
-          body: jsonEncode({"article": text}),
-        ).timeout(const Duration(seconds: 30));
+        final response = await http
+            .post(
+              Uri.parse('https://api.thechenabtimes.com/summarise.php'),
+              headers: {"Content-Type": "application/json"},
+              body: jsonEncode({"article": text}),
+            )
+            .timeout(const Duration(seconds: 30));
 
         if (response.statusCode == 200) {
           final data = jsonDecode(utf8.decode(response.bodyBytes));

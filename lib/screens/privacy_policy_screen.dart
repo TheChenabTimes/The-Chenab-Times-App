@@ -53,18 +53,26 @@ class PrivacyPolicyScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Privacy Policy'),
-      ),
+      appBar: AppBar(title: const Text('Privacy Policy')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Html(
           data: policyHtml,
           style: {
             'h1': Style(fontSize: FontSize.xxLarge),
-            'h2': Style(fontSize: FontSize.xLarge, fontWeight: FontWeight.bold, margin: Margins.only(top: 16)),
-            'p': Style(fontSize: FontSize.large, lineHeight: LineHeight.em(1.5)),
-            'li': Style(fontSize: FontSize.large, lineHeight: LineHeight.em(1.5)),
+            'h2': Style(
+              fontSize: FontSize.xLarge,
+              fontWeight: FontWeight.bold,
+              margin: Margins.only(top: 16),
+            ),
+            'p': Style(
+              fontSize: FontSize.large,
+              lineHeight: LineHeight.em(1.5),
+            ),
+            'li': Style(
+              fontSize: FontSize.large,
+              lineHeight: LineHeight.em(1.5),
+            ),
           },
         ),
       ),
