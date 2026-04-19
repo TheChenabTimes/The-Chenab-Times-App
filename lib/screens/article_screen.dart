@@ -159,8 +159,7 @@ class _ArticleScreenState extends State<ArticleScreen> {
           await SharePlus.instance.share(
             ShareParams(
               files: [XFile(path)],
-              text:
-                  '$cleanTitle\n\nDownload The Chenab Times App\n\nRead more:\n\n$articleUrl',
+              text: '$cleanTitle\n\nRead more:\n$articleUrl',
             ),
           );
         }

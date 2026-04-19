@@ -6,6 +6,7 @@ class UserModel {
   final String email;
   final String? photo;
   final String loginType;
+  final int bestStreak;
 
   const UserModel({
     required this.id,
@@ -13,6 +14,7 @@ class UserModel {
     required this.email,
     this.photo,
     required this.loginType,
+    this.bestStreak = 0,
   });
 
   factory UserModel.fromMap(Map<String, dynamic> map) {
@@ -22,6 +24,9 @@ class UserModel {
       email: '${map['email'] ?? ''}',
       photo: map['photo']?.toString(),
       loginType: '${map['login_type'] ?? map['loginType'] ?? 'email'}',
+      bestStreak: map['best_streak'] is int
+          ? map['best_streak'] as int
+          : int.tryParse('${map['best_streak'] ?? 0}') ?? 0,
     );
   }
 
@@ -32,6 +37,7 @@ class UserModel {
       'email': email,
       'photo': photo,
       'login_type': loginType,
+      'best_streak': bestStreak,
     };
   }
 

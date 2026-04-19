@@ -22,12 +22,10 @@ class SummarizationService {
       }
     }
 
-    final cleanText = HtmlHelper.stripAndUnescape(
-      text,
-    ).replaceAll(RegExp(r'\s+'), ' ').trim();
-    final truncatedText = cleanText.length > 3500
-        ? cleanText.substring(0, 3500)
-        : cleanText;
+    final truncatedText = _prepareArticleText(text);
+    if (truncatedText.isEmpty) {
+      return "Summary unavailable for this article.";
+    }
 
     try {
       final response = await http
@@ -66,6 +64,38 @@ class SummarizationService {
       }
     } catch (_) {}
 
-    return "Summary unavailable. Tap to read full article.";
+    return "Summary unavailable for this article.";
+  }
+
+  String _prepareArticleText(String text) {
+    final cleanText = HtmlHelper.stripAndUnescape(
+      text,
+    ).replaceAll(RegExp(r'\s+'), ' ').trim();
+    if (cleanText.isEmpty) return '';
+
+    final sentenceMatches = RegExp(
+      r'[^.!?]+[.!?]?',
+      multiLine: true,
+    ).allMatches(cleanText);
+    final buffer = StringBuffer();
+
+    for (final match in sentenceMatches) {
+      final sentence = match.group(0)?.trim() ?? '';
+      if (sentence.isEmpty) continue;
+      final nextLength = buffer.length + sentence.length + 1;
+      if (nextLength > 3500) break;
+      if (buffer.isNotEmpty) {
+        buffer.write(' ');
+      }
+      buffer.write(sentence);
+      if (buffer.length >= 2200) break;
+    }
+
+    final prepared = buffer.toString().trim();
+    if (prepared.isNotEmpty) {
+      return prepared;
+    }
+
+    return cleanText.length > 2200 ? cleanText.substring(0, 2200) : cleanText;
   }
 }

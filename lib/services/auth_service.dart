@@ -52,6 +52,7 @@ class AuthService extends ChangeNotifier {
   bool _initialized = false;
   bool _busy = false;
   int _streakSyncVersion = 0;
+  int _serverBestStreakHint = 0;
 
   UserModel? get currentUser => _currentUser;
   bool get isAuthenticated => _token != null && _currentUser != null;
@@ -67,10 +68,12 @@ class AuthService extends ChangeNotifier {
       final userJson = await _secureStorage.read(key: _userKey);
       if (userJson != null && userJson.isNotEmpty) {
         _currentUser = UserModel.fromJson(userJson);
+        _serverBestStreakHint = _currentUser?.bestStreak ?? 0;
       }
     } catch (_) {
       _token = null;
       _currentUser = null;
+      _serverBestStreakHint = 0;
     }
 
     _initialized = true;
@@ -154,6 +157,7 @@ class AuthService extends ChangeNotifier {
   Future<void> logout() async {
     _token = null;
     _currentUser = null;
+    _serverBestStreakHint = 0;
     await _secureStorage.delete(key: _tokenKey);
     await _secureStorage.delete(key: _userKey);
     final prefs = await SharedPreferences.getInstance();
@@ -209,6 +213,9 @@ class AuthService extends ChangeNotifier {
 
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_bestSyncedStreakKey, streak);
+    if (streak > _serverBestStreakHint) {
+      _serverBestStreakHint = streak;
+    }
     _streakSyncVersion++;
     notifyListeners();
   }
@@ -237,23 +244,39 @@ class AuthService extends ChangeNotifier {
 
     if (mergedStreak > knownServerStreak) {
       await syncStreak(mergedStreak);
+    } else {
+      _streakSyncVersion++;
+      notifyListeners();
     }
   }
 
   Future<int> fetchServerBestStreak() async {
     if (!isAuthenticated || _currentUser == null) return 0;
 
+    var resolvedBestStreak = _serverBestStreakHint;
+    if (_currentUser!.bestStreak > resolvedBestStreak) {
+      resolvedBestStreak = _currentUser!.bestStreak;
+    }
+
     try {
       final entries = await fetchLeaderboard();
-      final currentName = _currentUser!.name.trim().toLowerCase();
+      final normalizedName = _normalizeIdentity(_currentUser!.name);
+      final normalizedEmailPrefix = _normalizeIdentity(
+        _currentUser!.email.split('@').first,
+      );
       for (final entry in entries) {
-        if (entry.name.trim().toLowerCase() == currentName) {
-          return entry.bestStreak;
+        final normalizedEntryName = _normalizeIdentity(entry.name);
+        if (normalizedEntryName == normalizedName ||
+            normalizedEntryName == normalizedEmailPrefix) {
+          if (entry.bestStreak > resolvedBestStreak) {
+            resolvedBestStreak = entry.bestStreak;
+          }
         }
       }
     } catch (_) {}
 
-    return 0;
+    _serverBestStreakHint = resolvedBestStreak;
+    return resolvedBestStreak;
   }
 
   Future<List<LeaderboardEntry>> fetchLeaderboard() async {
@@ -372,9 +395,14 @@ class AuthService extends ChangeNotifier {
   }) async {
     _token = token;
     _currentUser = user;
+    _serverBestStreakHint = user.bestStreak;
     await _secureStorage.write(key: _tokenKey, value: token);
     await _secureStorage.write(key: _userKey, value: user.toJson());
     notifyListeners();
+  }
+
+  String _normalizeIdentity(String value) {
+    return value.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), '');
   }
 
   Map<String, dynamic> _decodeMap(String body) {
