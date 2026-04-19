@@ -591,7 +591,7 @@ class ScreenshotWidget extends StatelessWidget {
   final Uint8List? imageBytes;
   final GlobalKey _shareCardKey = GlobalKey();
 
-  const ScreenshotWidget({
+  ScreenshotWidget({
     super.key,
     required this.article,
     required this.summary,

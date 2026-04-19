@@ -91,7 +91,7 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+    final colorScheme = theme.colorScheme;
     final localizations = AppLocalizations.of(context);
     final locationService = context.watch<LocationService>();
     final weatherTitle =
@@ -106,9 +106,7 @@ class _HomeScreenState extends State<HomeScreen>
               : (locationService.weatherLabel ?? 'Tap to set'));
 
     return Scaffold(
-      backgroundColor: isDark
-          ? const Color(0xFF0D0D0D)
-          : const Color(0xFFF8F3EA),
+      backgroundColor: colorScheme.background,
       body: SafeArea(
         child: Column(
           children: [
@@ -118,34 +116,22 @@ class _HomeScreenState extends State<HomeScreen>
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: isDark
-                      ? const [Color(0xFF0D0D0D), Color(0xFF1A1A1A)]
-                      : const [Color(0xFFFFFBF5), Color(0xFFF1DDC1)],
+                  colors: [colorScheme.background, colorScheme.surface],
                 ),
               ),
               child: Container(
                 padding: const EdgeInsets.fromLTRB(12, 9, 12, 9),
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: isDark
-                        ? const [Color(0xFF141414), Color(0xFF1A1A1A)]
-                        : const [Color(0xFFFFFCF7), Color(0xFFF3E2CA)],
-                  ),
+                  color: colorScheme.surface,
                   borderRadius: BorderRadius.circular(34),
                   border: Border.all(
-                    color: isDark
-                        ? const Color(0xFF2A2A2A)
-                        : const Color(0xFFE1CCAF),
+                    color: colorScheme.onSurface.withValues(alpha: 0.12),
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: isDark
-                          ? const Color(0x22000000)
-                          : const Color(0x14000000),
+                      color: colorScheme.onSurface.withValues(alpha: 0.08),
                       blurRadius: 22,
-                      offset: Offset(0, 8),
+                      offset: const Offset(0, 8),
                     ),
                   ],
                 ),
@@ -201,18 +187,10 @@ class _HomeScreenState extends State<HomeScreen>
             Container(
               width: double.infinity,
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: isDark
-                      ? const [Color(0xFF111111), Color(0xFF171717)]
-                      : const [Color(0xFFFFFBF5), Color(0xFFF2E2CA)],
-                ),
+                color: colorScheme.surface,
                 border: Border(
                   bottom: BorderSide(
-                    color: isDark
-                        ? const Color(0xFF2A2A2A)
-                        : const Color(0xFFE6D4BB),
+                    color: colorScheme.onSurface.withValues(alpha: 0.12),
                     width: 1,
                   ),
                 ),
@@ -223,28 +201,33 @@ class _HomeScreenState extends State<HomeScreen>
                 tabAlignment: TabAlignment.start,
                 dividerColor: Colors.transparent,
                 indicator: BoxDecoration(
-                  gradient: const LinearGradient(
+                  gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
-                    colors: [Color(0xFFB22D1F), Color(0xFF7C1714)],
+                    colors: [
+                      colorScheme.primary,
+                      colorScheme.primary.withValues(alpha: 0.78),
+                    ],
                   ),
                   borderRadius: BorderRadius.circular(26),
-                  border: Border.all(color: const Color(0xFFE8C08C)),
-                  boxShadow: const [
+                  border: Border.all(
+                    color: colorScheme.primary.withValues(alpha: 0.32),
+                  ),
+                  boxShadow: [
                     BoxShadow(
-                      color: Color(0x2A8C1D18),
+                      color: colorScheme.primary.withValues(alpha: 0.16),
                       blurRadius: 14,
-                      offset: Offset(0, 4),
+                      offset: const Offset(0, 4),
                     ),
                   ],
                 ),
                 indicatorSize: TabBarIndicatorSize.tab,
                 indicatorPadding: const EdgeInsets.symmetric(horizontal: 6),
                 labelPadding: const EdgeInsets.symmetric(horizontal: 6),
-                labelColor: Colors.white,
-                unselectedLabelColor: isDark
-                    ? const Color(0xFFD0D0D0)
-                    : const Color(0xFF6C5640),
+                labelColor: theme.colorScheme.onPrimary,
+                unselectedLabelColor: colorScheme.onSurface.withValues(
+                  alpha: 0.72,
+                ),
                 labelStyle: theme.textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0.2,
@@ -295,20 +278,20 @@ class _HomeScreenState extends State<HomeScreen>
                                       : FontWeight.w600,
                                   letterSpacing: isSelected ? 0.22 : 0,
                                   color: isSelected
-                                      ? Colors.white
-                                      : (isDark
-                                            ? const Color(0xFFD0D0D0)
-                                            : const Color(0xFF6C5640)),
+                                      ? theme.colorScheme.onPrimary
+                                      : colorScheme.onSurface.withValues(
+                                          alpha: 0.72,
+                                        ),
                                 ) ??
                             TextStyle(
                               fontWeight: isSelected
                                   ? FontWeight.w800
                                   : FontWeight.w600,
                               color: isSelected
-                                  ? Colors.white
-                                  : (isDark
-                                        ? const Color(0xFFD0D0D0)
-                                        : const Color(0xFF6C5640)),
+                                  ? theme.colorScheme.onPrimary
+                                  : colorScheme.onSurface.withValues(
+                                      alpha: 0.72,
+                                    ),
                             ),
                         child: Text(
                           tab.text ??
@@ -361,7 +344,7 @@ class _PremiumHeaderActionButtonState
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final colorScheme = Theme.of(context).colorScheme;
     return Semantics(
       label: widget.semanticLabel,
       button: true,
@@ -377,7 +360,7 @@ class _PremiumHeaderActionButtonState
             onTapCancel: () => _setPressed(false),
             onTapUp: (_) => _setPressed(false),
             borderRadius: BorderRadius.circular(999),
-            splashColor: const Color(0x338C1D18),
+            splashColor: colorScheme.primary.withValues(alpha: 0.2),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 240),
               curve: Curves.easeOutCubic,
@@ -385,24 +368,20 @@ class _PremiumHeaderActionButtonState
               height: 34,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: isDark
-                      ? const [Color(0xFF9D241C), Color(0xFF6F1612)]
-                      : const [Color(0xFFB22D1F), Color(0xFF7C1714)],
-                ),
+                color: colorScheme.primary,
                 boxShadow: [
                   BoxShadow(
-                    color: isDark
-                        ? const Color(0x22000000)
-                        : const Color(0x238C1D18),
+                    color: colorScheme.primary.withValues(alpha: 0.2),
                     blurRadius: 6,
-                    offset: Offset(0, 2),
+                    offset: const Offset(0, 2),
                   ),
                 ],
               ),
-              child: Icon(widget.icon, color: Colors.white, size: 17),
+              child: Icon(
+                widget.icon,
+                color: Theme.of(context).colorScheme.onPrimary,
+                size: 17,
+              ),
             ),
           ),
         ),
@@ -426,13 +405,14 @@ class _WeatherHeaderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return Material(
       color: Colors.transparent,
       child: InkWell(
         borderRadius: BorderRadius.circular(24),
         onTap: onTap,
-        splashColor: const Color(0x228C1D18),
+        splashColor: colorScheme.primary.withValues(alpha: 0.14),
         child: SizedBox(
           width: 78,
           height: 58,
@@ -449,9 +429,7 @@ class _WeatherHeaderCard extends StatelessWidget {
                       fontSize: 10,
                       fontWeight: FontWeight.w700,
                     ).copyWith(
-                      color: isDark
-                          ? const Color(0xFFB5B5B5)
-                          : const Color(0xFF7E5C3B),
+                      color: colorScheme.onSurface.withValues(alpha: 0.68),
                     ),
               ),
               const SizedBox(height: 4),
@@ -461,25 +439,22 @@ class _WeatherHeaderCard extends StatelessWidget {
                     value,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style:
-                        const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w800,
-                        ).copyWith(
-                          color: isDark
-                              ? Colors.white
-                              : const Color(0xFF6D1715),
-                        ),
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                    ).copyWith(color: colorScheme.onSurface),
                   ),
                   if (loading) ...[
                     const SizedBox(width: 6),
-                    const SizedBox(
+                    SizedBox(
                       width: 12,
                       height: 12,
                       child: CircularProgressIndicator(
                         strokeWidth: 1.8,
-                        valueColor: AlwaysStoppedAnimation(Color(0xFF8C1D18)),
-                        backgroundColor: Color(0xFFE7D5BE),
+                        valueColor: AlwaysStoppedAnimation(colorScheme.primary),
+                        backgroundColor: colorScheme.onSurface.withValues(
+                          alpha: 0.12,
+                        ),
                       ),
                     ),
                   ],

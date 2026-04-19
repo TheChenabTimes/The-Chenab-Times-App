@@ -163,12 +163,14 @@ class _GamesScreenState extends State<GamesScreen> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [Color(0xFFF8F3EA), Color(0xFFF3E4CF)],
+          colors: [colorScheme.background, colorScheme.surface],
         ),
       ),
       child: SafeArea(
@@ -227,6 +229,8 @@ class _GamesScreenState extends State<GamesScreen> with WidgetsBindingObserver {
 
   Widget _buildHero() {
     final authService = context.watch<AuthService>();
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final totalPoints =
         _scrambleStreak +
         _vocabScore +
@@ -236,18 +240,20 @@ class _GamesScreenState extends State<GamesScreen> with WidgetsBindingObserver {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFFFFFBF5), Color(0xFFF2E2CA)],
+          colors: [colorScheme.surface, colorScheme.background],
         ),
         borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: const Color(0xFFE4CEB2)),
-        boxShadow: const [
+        border: Border.all(
+          color: colorScheme.onSurface.withValues(alpha: 0.12),
+        ),
+        boxShadow: [
           BoxShadow(
-            color: Color(0x14000000),
+            color: colorScheme.onSurface.withValues(alpha: 0.08),
             blurRadius: 18,
-            offset: Offset(0, 8),
+            offset: const Offset(0, 8),
           ),
         ],
       ),
@@ -256,17 +262,20 @@ class _GamesScreenState extends State<GamesScreen> with WidgetsBindingObserver {
           Container(
             width: 62,
             height: 62,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               shape: BoxShape.circle,
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [Color(0xFFB22D1F), Color(0xFF7C1714)],
+                colors: [
+                  colorScheme.primary,
+                  colorScheme.primary.withValues(alpha: 0.78),
+                ],
               ),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.extension_rounded,
-              color: Colors.white,
+              color: theme.colorScheme.onPrimary,
               size: 30,
             ),
           ),
@@ -278,25 +287,25 @@ class _GamesScreenState extends State<GamesScreen> with WidgetsBindingObserver {
                 Text(
                   'Offline English Games',
                   style: TextStyle(
-                    color: Color(0xFF4A2017),
+                    color: colorScheme.onSurface,
                     fontSize: 24,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
-                SizedBox(height: 6),
+                const SizedBox(height: 6),
                 Text(
                   'Practice vocabulary, spelling, crossword clues, and sentence sense without internet.',
                   style: TextStyle(
-                    color: Color(0xFF7A6247),
+                    color: colorScheme.onSurface.withValues(alpha: 0.72),
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 Text(
                   'Saved points: $totalPoints',
                   style: TextStyle(
-                    color: Color(0xFF8C1D18),
+                    color: colorScheme.primary,
                     fontSize: 13,
                     fontWeight: FontWeight.w800,
                   ),
@@ -342,13 +351,14 @@ class _GamesScreenState extends State<GamesScreen> with WidgetsBindingObserver {
   }
 
   Widget _buildSectionTitle({required String title, required String subtitle}) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           title,
-          style: const TextStyle(
-            color: Color(0xFF3B2417),
+          style: TextStyle(
+            color: colorScheme.onSurface,
             fontSize: 20,
             fontWeight: FontWeight.w800,
           ),
@@ -356,8 +366,8 @@ class _GamesScreenState extends State<GamesScreen> with WidgetsBindingObserver {
         const SizedBox(height: 4),
         Text(
           subtitle,
-          style: const TextStyle(
-            color: Color(0xFF7A6247),
+          style: TextStyle(
+            color: colorScheme.onSurface.withValues(alpha: 0.72),
             fontSize: 13,
             fontWeight: FontWeight.w600,
           ),
@@ -367,6 +377,7 @@ class _GamesScreenState extends State<GamesScreen> with WidgetsBindingObserver {
   }
 
   Widget _buildScrambleCard() {
+    final colorScheme = Theme.of(context).colorScheme;
     return _GameCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -384,8 +395,8 @@ class _GamesScreenState extends State<GamesScreen> with WidgetsBindingObserver {
           const SizedBox(height: 10),
           Text(
             _scramblePuzzle.hint,
-            style: const TextStyle(
-              color: Color(0xFF7A6247),
+            style: TextStyle(
+              color: colorScheme.onSurface.withValues(alpha: 0.72),
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -405,18 +416,25 @@ class _GamesScreenState extends State<GamesScreen> with WidgetsBindingObserver {
                         height: 42,
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
-                          gradient: const LinearGradient(
+                          gradient: LinearGradient(
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
-                            colors: [Color(0xFFFFF7EA), Color(0xFFF3DFC2)],
+                            colors: [
+                              colorScheme.surface,
+                              colorScheme.background,
+                            ],
                           ),
                           borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: const Color(0xFFE3CCAC)),
+                          border: Border.all(
+                            color: colorScheme.onSurface.withValues(
+                              alpha: 0.12,
+                            ),
+                          ),
                         ),
                         child: Text(
                           letter.toUpperCase(),
-                          style: const TextStyle(
-                            color: Color(0xFF6D1715),
+                          style: TextStyle(
+                            color: colorScheme.primary,
                             fontSize: 20,
                             fontWeight: FontWeight.w800,
                           ),
@@ -433,14 +451,18 @@ class _GamesScreenState extends State<GamesScreen> with WidgetsBindingObserver {
             decoration: InputDecoration(
               hintText: 'Type your answer',
               filled: true,
-              fillColor: const Color(0xFFFFFBF5),
+              fillColor: colorScheme.surface,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
-                borderSide: const BorderSide(color: Color(0xFFE4CEB2)),
+                borderSide: BorderSide(
+                  color: colorScheme.onSurface.withValues(alpha: 0.12),
+                ),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
-                borderSide: const BorderSide(color: Color(0xFFE4CEB2)),
+                borderSide: BorderSide(
+                  color: colorScheme.onSurface.withValues(alpha: 0.12),
+                ),
               ),
             ),
           ),
@@ -448,7 +470,7 @@ class _GamesScreenState extends State<GamesScreen> with WidgetsBindingObserver {
           FilledButton(
             onPressed: _submitScramble,
             style: FilledButton.styleFrom(
-              backgroundColor: const Color(0xFF8C1D18),
+              backgroundColor: colorScheme.primary,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
@@ -461,6 +483,7 @@ class _GamesScreenState extends State<GamesScreen> with WidgetsBindingObserver {
   }
 
   Widget _buildVocabCard() {
+    final colorScheme = Theme.of(context).colorScheme;
     return _GameCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -481,8 +504,8 @@ class _GamesScreenState extends State<GamesScreen> with WidgetsBindingObserver {
           const SizedBox(height: 10),
           Text(
             'Which option is closest in meaning to "${_vocabQuestion.word}"?',
-            style: const TextStyle(
-              color: Color(0xFF3B2417),
+            style: TextStyle(
+              color: colorScheme.onSurface,
               fontSize: 18,
               fontWeight: FontWeight.w800,
             ),
@@ -498,8 +521,10 @@ class _GamesScreenState extends State<GamesScreen> with WidgetsBindingObserver {
                     horizontal: 14,
                     vertical: 14,
                   ),
-                  side: const BorderSide(color: Color(0xFFE3CCAC)),
-                  backgroundColor: const Color(0xFFFFFBF5),
+                  side: BorderSide(
+                    color: colorScheme.onSurface.withValues(alpha: 0.12),
+                  ),
+                  backgroundColor: colorScheme.surface,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
@@ -508,8 +533,8 @@ class _GamesScreenState extends State<GamesScreen> with WidgetsBindingObserver {
                   alignment: Alignment.centerLeft,
                   child: Text(
                     option,
-                    style: const TextStyle(
-                      color: Color(0xFF4A2017),
+                    style: TextStyle(
+                      color: colorScheme.onSurface,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -523,6 +548,7 @@ class _GamesScreenState extends State<GamesScreen> with WidgetsBindingObserver {
   }
 
   Widget _buildSentenceCard() {
+    final colorScheme = Theme.of(context).colorScheme;
     return _GameCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -543,8 +569,8 @@ class _GamesScreenState extends State<GamesScreen> with WidgetsBindingObserver {
           const SizedBox(height: 10),
           Text(
             _sentenceChallenge.prompt,
-            style: const TextStyle(
-              color: Color(0xFF3B2417),
+            style: TextStyle(
+              color: colorScheme.onSurface,
               fontSize: 18,
               fontWeight: FontWeight.w800,
             ),
@@ -560,18 +586,20 @@ class _GamesScreenState extends State<GamesScreen> with WidgetsBindingObserver {
                   width: double.infinity,
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
+                    gradient: LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
-                      colors: [Color(0xFFFFFBF5), Color(0xFFF5E7D1)],
+                      colors: [colorScheme.surface, colorScheme.background],
                     ),
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: const Color(0xFFE3CCAC)),
+                    border: Border.all(
+                      color: colorScheme.onSurface.withValues(alpha: 0.12),
+                    ),
                   ),
                   child: Text(
                     option,
-                    style: const TextStyle(
-                      color: Color(0xFF4A2017),
+                    style: TextStyle(
+                      color: colorScheme.onSurface,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -585,6 +613,7 @@ class _GamesScreenState extends State<GamesScreen> with WidgetsBindingObserver {
   }
 
   Widget _buildSpellingBeeCard() {
+    final colorScheme = Theme.of(context).colorScheme;
     return _GameCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -607,8 +636,8 @@ class _GamesScreenState extends State<GamesScreen> with WidgetsBindingObserver {
           const SizedBox(height: 10),
           Text(
             _spellingBeeQuestion.prompt,
-            style: const TextStyle(
-              color: Color(0xFF3B2417),
+            style: TextStyle(
+              color: colorScheme.onSurface,
               fontSize: 18,
               fontWeight: FontWeight.w800,
             ),
@@ -624,8 +653,10 @@ class _GamesScreenState extends State<GamesScreen> with WidgetsBindingObserver {
                     horizontal: 14,
                     vertical: 14,
                   ),
-                  side: const BorderSide(color: Color(0xFFE3CCAC)),
-                  backgroundColor: const Color(0xFFFFFBF5),
+                  side: BorderSide(
+                    color: colorScheme.onSurface.withValues(alpha: 0.12),
+                  ),
+                  backgroundColor: colorScheme.surface,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
@@ -634,8 +665,8 @@ class _GamesScreenState extends State<GamesScreen> with WidgetsBindingObserver {
                   alignment: Alignment.centerLeft,
                   child: Text(
                     option,
-                    style: const TextStyle(
-                      color: Color(0xFF4A2017),
+                    style: TextStyle(
+                      color: colorScheme.onSurface,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -649,6 +680,7 @@ class _GamesScreenState extends State<GamesScreen> with WidgetsBindingObserver {
   }
 
   Widget _buildCrosswordCard() {
+    final colorScheme = Theme.of(context).colorScheme;
     return _GameCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -672,8 +704,8 @@ class _GamesScreenState extends State<GamesScreen> with WidgetsBindingObserver {
           const SizedBox(height: 10),
           Text(
             _crosswordPuzzle.clue,
-            style: const TextStyle(
-              color: Color(0xFF3B2417),
+            style: TextStyle(
+              color: colorScheme.onSurface,
               fontSize: 18,
               fontWeight: FontWeight.w800,
             ),
@@ -681,8 +713,8 @@ class _GamesScreenState extends State<GamesScreen> with WidgetsBindingObserver {
           const SizedBox(height: 8),
           Text(
             'Letters: ${_crosswordPuzzle.answer.length}',
-            style: const TextStyle(
-              color: Color(0xFF7A6247),
+            style: TextStyle(
+              color: colorScheme.onSurface.withValues(alpha: 0.72),
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -692,14 +724,18 @@ class _GamesScreenState extends State<GamesScreen> with WidgetsBindingObserver {
             decoration: InputDecoration(
               hintText: 'Type the answer',
               filled: true,
-              fillColor: const Color(0xFFFFFBF5),
+              fillColor: colorScheme.surface,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
-                borderSide: const BorderSide(color: Color(0xFFE4CEB2)),
+                borderSide: BorderSide(
+                  color: colorScheme.onSurface.withValues(alpha: 0.12),
+                ),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
-                borderSide: const BorderSide(color: Color(0xFFE4CEB2)),
+                borderSide: BorderSide(
+                  color: colorScheme.onSurface.withValues(alpha: 0.12),
+                ),
               ),
             ),
           ),
@@ -707,7 +743,7 @@ class _GamesScreenState extends State<GamesScreen> with WidgetsBindingObserver {
           FilledButton(
             onPressed: _submitCrossword,
             style: FilledButton.styleFrom(
-              backgroundColor: const Color(0xFF8C1D18),
+              backgroundColor: colorScheme.primary,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
@@ -826,12 +862,13 @@ class _GamesScreenState extends State<GamesScreen> with WidgetsBindingObserver {
   }
 
   void _showFeedback(String message, {required bool isSuccess}) {
+    final colorScheme = Theme.of(context).colorScheme;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
         backgroundColor: isSuccess
-            ? const Color(0xFF2F6C52)
-            : const Color(0xFF8C1D18),
+            ? colorScheme.primary.withValues(alpha: 0.72)
+            : colorScheme.primary,
       ),
     );
   }
@@ -1272,16 +1309,17 @@ class _GameCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFFCF7),
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(24),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
-            color: Color(0x18000000),
+            color: colorScheme.onSurface.withValues(alpha: 0.08),
             blurRadius: 12,
-            offset: Offset(0, 6),
+            offset: const Offset(0, 6),
           ),
         ],
       ),
@@ -1298,21 +1336,24 @@ class _ScorePill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFFFFF7EA), Color(0xFFF3DFC2)],
+          colors: [colorScheme.surface, colorScheme.background],
         ),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: const Color(0xFFE3CCAC)),
+        border: Border.all(
+          color: colorScheme.onSurface.withValues(alpha: 0.12),
+        ),
       ),
       child: Text(
         '$label: $value',
-        style: const TextStyle(
-          color: Color(0xFF6D1715),
+        style: TextStyle(
+          color: colorScheme.primary,
           fontWeight: FontWeight.w800,
         ),
       ),
