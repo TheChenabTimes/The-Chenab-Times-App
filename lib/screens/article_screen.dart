@@ -114,14 +114,17 @@ class _ArticleScreenState extends State<ArticleScreen> {
       final Uint8List image = await _screenshotController.captureFromWidget(
         Theme(
           data: lightTheme,
-          child: ScreenshotWidget(
-            article: _currentArticle,
-            summary: summary,
-            imageBytes: imageBytes,
+          child: SizedBox.square(
+            dimension: 360,
+            child: ScreenshotWidget(
+              article: _currentArticle,
+              summary: summary,
+              imageBytes: imageBytes,
+            ),
           ),
         ),
         delay: const Duration(milliseconds: 120),
-        pixelRatio: 1.0,
+        pixelRatio: 3.0,
       );
 
       if (mounted) Navigator.of(context).pop();
@@ -586,6 +589,7 @@ class ScreenshotWidget extends StatelessWidget {
   final Article article;
   final String summary;
   final Uint8List? imageBytes;
+  final GlobalKey _shareCardKey = GlobalKey();
 
   const ScreenshotWidget({
     super.key,
@@ -602,13 +606,11 @@ class ScreenshotWidget extends StatelessWidget {
         ? DateFormat.yMMMd().format(article.date!)
         : 'Latest';
 
-    return Material(
-      color: const Color(0xFFF8F3EA),
-      child: Center(
+    return RepaintBoundary(
+      key: _shareCardKey,
+      child: AspectRatio(
+        aspectRatio: 1,
         child: Container(
-          width: 600,
-          height: 600,
-          margin: const EdgeInsets.all(24),
           padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
             color: Colors.white,
@@ -622,7 +624,6 @@ class ScreenshotWidget extends StatelessWidget {
             ],
           ),
           child: Column(
-            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Center(child: Image.asset(_logoAsset, height: 42)),
@@ -651,11 +652,13 @@ class ScreenshotWidget extends StatelessWidget {
               ),
               if (imageBytes != null) ...[
                 const SizedBox(height: 18),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(22),
-                  child: SizedBox.square(
-                    dimension: 210,
-                    child: Image.memory(imageBytes!, fit: BoxFit.cover),
+                Center(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(22),
+                    child: SizedBox.square(
+                      dimension: 210,
+                      child: Image.memory(imageBytes!, fit: BoxFit.cover),
+                    ),
                   ),
                 ),
               ],
@@ -674,11 +677,11 @@ class ScreenshotWidget extends StatelessWidget {
                     height: 1.55,
                     color: Color(0xFF3E3024),
                   ),
-                  maxLines: 4,
+                  maxLines: imageBytes != null ? 4 : 8,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              const Spacer(),
+              const SizedBox(height: 18),
               Container(
                 padding: const EdgeInsets.all(18),
                 decoration: BoxDecoration(
