@@ -57,9 +57,7 @@ Future<void> _openChenabLinkInAppAsync(String? link) async {
     return;
   }
 
-  final languageCode = LanguageService.instance.isReady
-      ? LanguageService.instance.appLocale.languageCode
-      : null;
+  final languageCode = LanguageService.instance.appLocale.languageCode;
   final article = await RssService().fetchArticleByUrl(
     url,
     languageCode: languageCode,

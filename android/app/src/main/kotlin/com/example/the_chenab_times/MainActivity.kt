@@ -1,4 +1,4 @@
-package com.example.the_chenab_times
+package com.thechenabtimes.app
 
 import android.content.Intent
 import io.flutter.embedding.android.FlutterActivity
