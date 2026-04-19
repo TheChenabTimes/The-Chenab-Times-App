@@ -292,7 +292,7 @@ class _CategoryNewsTabState extends State<CategoryNewsTab>
                   ),
                   SizedBox(height: 4),
                   Text(
-                    'Latest reports from this section in the new premium layout.',
+                    'Latest verified news from this category',
                     style: TextStyle(
                       color: Color(0xFF7A6247),
                       fontSize: 13,

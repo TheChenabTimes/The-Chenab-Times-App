@@ -38,6 +38,7 @@ class ArticleScreen extends StatefulWidget {
 }
 
 class _ArticleScreenState extends State<ArticleScreen> {
+  static const _logoAsset = 'lib/images/appheading.png';
   late PageController _pageController;
   late int _currentIndex;
   final _screenshotController = ScreenshotController();
@@ -132,12 +133,13 @@ class _ArticleScreenState extends State<ArticleScreen> {
           final path = '${directory.path}/screenshot_${DateTime.now().millisecondsSinceEpoch}.png';
           final imageFile = File(path);
           await imageFile.writeAsBytes(image);
+          final cleanTitle = HtmlHelper.stripAndUnescape(_currentArticle.title).trim();
+          final articleUrl = _currentArticle.link ?? '';
 
-          // Updated to use the non-deprecated SharePlus pattern
           await SharePlus.instance.share(
             ShareParams(
               files: [XFile(path)],
-              text: 'Check out this article from The Chenab Times!',
+              text: '$cleanTitle\n\nRead more:\n\n$articleUrl',
             ),
           );
         }
@@ -156,14 +158,24 @@ class _ArticleScreenState extends State<ArticleScreen> {
 
         return Scaffold(
           appBar: AppBar(
-            title: Image.asset('lib/images/app_heading.png', height: 30),
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_rounded),
+              onPressed: () => Navigator.of(context).maybePop(),
+            ),
+            title: Image.asset(_logoAsset, height: 38),
             centerTitle: true,
             actions: [
               IconButton(
+                tooltip: 'Save article',
                 icon: Icon(isSaved ? Icons.bookmark : Icons.bookmark_border_outlined),
                 onPressed: () => _toggleSave(savedArticlesProvider),
               ),
-              IconButton(icon: const Icon(Icons.share_outlined), onPressed: _shareArticle),
+              IconButton(
+                tooltip: 'Share article',
+                icon: const Icon(Icons.share_outlined),
+                onPressed: _shareArticle,
+              ),
+              const SizedBox(width: 4),
             ],
           ),
           body: PageView.builder(
@@ -395,7 +407,7 @@ class __ArticlePageState extends State<_ArticlePage> {
     if (_isLoadingSummary) {
       return Container(
         width: double.infinity,
-        padding: const EdgeInsets.all(22),
+        padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
           color: const Color(0xFFFFFCF7),
           borderRadius: BorderRadius.circular(26),
@@ -420,7 +432,7 @@ class __ArticlePageState extends State<_ArticlePage> {
     if (_summaryError) {
       return Container(
         width: double.infinity,
-        padding: const EdgeInsets.all(22),
+        padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
           color: const Color(0xFFFFFCF7),
           borderRadius: BorderRadius.circular(26),
@@ -438,7 +450,7 @@ class __ArticlePageState extends State<_ArticlePage> {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(22),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: const Color(0xFFFFFCF7),
         borderRadius: BorderRadius.circular(26),
@@ -457,12 +469,12 @@ class __ArticlePageState extends State<_ArticlePage> {
           const Row(
             children: [
               Icon(
-                Icons.auto_awesome_rounded,
+                Icons.bolt_rounded,
                 color: Color(0xFF8C1D18),
               ),
               SizedBox(width: 8),
               Text(
-                'Summary',
+                'Read In Short',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w800,
@@ -521,6 +533,7 @@ class _MetaBadge extends StatelessWidget {
 }
 
 class ScreenshotWidget extends StatelessWidget {
+  static const _logoAsset = 'lib/images/appheading.png';
   final Article article;
   final String summary;
   final Uint8List? imageBytes;
@@ -529,21 +542,91 @@ class ScreenshotWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.white,
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Image.asset('lib/images/app_heading.png', height: 30),
-          const SizedBox(height: 16),
-          Text(HtmlHelper.stripAndUnescape(article.title), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black)),
-          const SizedBox(height: 16),
-          if (imageBytes != null) ClipRRect(borderRadius: BorderRadius.circular(8), child: Image.memory(imageBytes!)),
-          const SizedBox(height: 16),
-          Text(summary, style: const TextStyle(fontSize: 14, color: Colors.black87)),
-        ],
+    final cleanTitle = HtmlHelper.stripAndUnescape(article.title);
+    final articleUrl = article.link ?? '';
+
+    return Material(
+      color: const Color(0xFFF8F3EA),
+      child: Center(
+        child: Container(
+          width: 720,
+          margin: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(28),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x14000000),
+                blurRadius: 24,
+                offset: Offset(0, 12),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Center(child: Image.asset(_logoAsset, height: 42)),
+              const SizedBox(height: 18),
+              Text(
+                cleanTitle,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 26,
+                  height: 1.2,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF1F1811),
+                ),
+              ),
+              if (imageBytes != null) ...[
+                const SizedBox(height: 18),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(22),
+                  child: Image.memory(
+                    imageBytes!,
+                    height: 320,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ],
+              const SizedBox(height: 18),
+              Container(
+                padding: const EdgeInsets.all(18),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFFCF7),
+                  borderRadius: BorderRadius.circular(22),
+                  border: Border.all(color: const Color(0xFFE7D6C0)),
+                ),
+                child: Text(
+                  summary,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    height: 1.65,
+                    color: Color(0xFF3E3024),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 18),
+              Container(
+                padding: const EdgeInsets.all(18),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF8F3EA),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  '$cleanTitle\n\nRead more:\n\n$articleUrl',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    height: 1.5,
+                    color: Color(0xFF4A2017),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

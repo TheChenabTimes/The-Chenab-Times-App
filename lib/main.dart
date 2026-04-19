@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:typed_data';
+import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:http/http.dart' as http;
 import 'services/summarization_service.dart';
@@ -16,6 +17,7 @@ import 'l10n/app_localizations.dart';
 import 'models/article_model.dart';
 import 'models/notification_model.dart';
 import 'screens/article_screen.dart';
+import 'screens/article_webview_screen.dart';
 import 'screens/donate_screen.dart';
 import 'screens/games_screen.dart';
 import 'screens/home_screen.dart';
@@ -31,6 +33,31 @@ import 'services/theme_service.dart';
 
 // GLOBAL NAVIGATOR KEY
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+const MethodChannel _deepLinkChannel = MethodChannel(
+  'thechenabtimes/deep_links',
+);
+
+void _openChenabLinkInApp(String? link) {
+  final url = link?.trim();
+  if (url == null || url.isEmpty) return;
+  final uri = Uri.tryParse(url);
+  final host = uri?.host.toLowerCase();
+  final isChenabLink =
+      host == 'thechenabtimes.com' || host == 'www.thechenabtimes.com';
+  if (!isChenabLink) return;
+
+  final context = navigatorKey.currentContext;
+  if (context == null) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _openChenabLinkInApp(url);
+    });
+    return;
+  }
+
+  navigatorKey.currentState?.push(
+    MaterialPageRoute(builder: (_) => ArticleWebViewScreen(url: url)),
+  );
+}
 
 @pragma('vm:entry-point')
 Future<void> _firebaseBackgroundHandler(RemoteMessage message) async {
@@ -57,6 +84,11 @@ void main() async {
   runZonedGuarded(
     () async {
       WidgetsFlutterBinding.ensureInitialized();
+      _deepLinkChannel.setMethodCallHandler((call) async {
+        if (call.method == 'openLink') {
+          _openChenabLinkInApp(call.arguments as String?);
+        }
+      });
       final notificationProvider = NotificationProvider();
 
       try {
@@ -191,6 +223,15 @@ void main() async {
           debugPrint("Prefetch error: $e");
         }
       });
+
+      final initialDeepLink = await _deepLinkChannel.invokeMethod<String>(
+        'getInitialLink',
+      );
+      if (initialDeepLink != null && initialDeepLink.isNotEmpty) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _openChenabLinkInApp(initialDeepLink);
+        });
+      }
 
       final dbService = DatabaseService();
 

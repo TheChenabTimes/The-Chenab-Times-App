@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:the_chenab_times/services/auth_service.dart';
+import 'package:the_chenab_times/utils/avatar_helper.dart';
 
 class LeaderboardScreen extends StatefulWidget {
   const LeaderboardScreen({super.key});
@@ -80,6 +81,14 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                   child: Row(
                     children: [
                       _RankBadge(rank: index + 1),
+                      const SizedBox(width: 14),
+                      CircleAvatar(
+                        radius: 24,
+                        backgroundColor: const Color(0xFFF2E2CA),
+                        backgroundImage: NetworkImage(
+                          getUserAvatar('${entry.name}@thechenabtimes.local', null),
+                        ),
+                      ),
                       const SizedBox(width: 14),
                       Expanded(
                         child: Column(
