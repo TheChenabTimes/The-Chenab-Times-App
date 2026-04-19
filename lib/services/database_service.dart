@@ -117,16 +117,22 @@ class DatabaseService {
   }
 
   // User Methods
-  Future<int> createUser(User user) async {
+  Future<int> createUser(UserModel user) async {
     final db = await database;
     return await db.insert(
       'users',
-      user.toMap(),
+      {
+        'id': user.id,
+        'username': user.name,
+        'password_hash': '',
+        'email': user.email,
+        'profile_picture': user.photo,
+      },
       conflictAlgorithm: ConflictAlgorithm.fail,
     );
   }
 
-  Future<User?> getUser(String username) async {
+  Future<UserModel?> getUser(String username) async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query(
       'users',
@@ -134,16 +140,26 @@ class DatabaseService {
       whereArgs: [username],
     );
     if (maps.isNotEmpty) {
-      return User.fromMap(maps.first);
+      return UserModel.fromMap({
+        'id': maps.first['id'],
+        'name': maps.first['username'],
+        'email': maps.first['email'],
+        'photo': maps.first['profile_picture'],
+        'login_type': 'email',
+      });
     }
     return null;
   }
 
-  Future<int> updateUser(User user) async {
+  Future<int> updateUser(UserModel user) async {
     final db = await database;
     return await db.update(
       'users',
-      user.toMap(),
+      {
+        'username': user.name,
+        'email': user.email,
+        'profile_picture': user.photo,
+      },
       where: 'id = ?',
       whereArgs: [user.id],
     );
@@ -164,6 +180,11 @@ class DatabaseService {
     await db.delete('saved_articles', where: 'id = ?', whereArgs: [id]);
   }
 
+  Future<void> deleteSavedArticleByLink(String link) async {
+    final db = await database;
+    await db.delete('saved_articles', where: 'link = ?', whereArgs: [link]);
+  }
+
   Future<void> deleteAllSavedArticles() async {
     final db = await database;
     await db.delete('saved_articles');
@@ -171,8 +192,25 @@ class DatabaseService {
 
   Future<List<Article>> getSavedArticles() async {
     final db = await database;
-    final List<Map<String, dynamic>> maps = await db.query('saved_articles');
+    final List<Map<String, dynamic>> maps = await db.query(
+      'saved_articles',
+      orderBy: 'id DESC',
+    );
     return List.generate(maps.length, (i) => Article.fromMap(maps[i]));
+  }
+
+  Future<void> replaceSavedArticles(List<Article> articles) async {
+    final db = await database;
+    await db.transaction((txn) async {
+      await txn.delete('saved_articles');
+      for (final article in articles) {
+        await txn.insert(
+          'saved_articles',
+          article.toMap(),
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
+      }
+    });
   }
 
   Future<bool> isArticleSaved(String? link) async {

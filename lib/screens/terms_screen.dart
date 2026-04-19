@@ -43,7 +43,7 @@ class _TermsScreenState extends State<TermsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "Terms of Service – The Chenab Times App",
+                      "Terms of Service - The Chenab Times App",
                       style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
@@ -51,8 +51,8 @@ class _TermsScreenState extends State<TermsScreen> {
                     ),
                     SizedBox(height: 16),
                     Text(
-                      "Welcome to The Chenab Times mobile application (“App”). The App is owned "
-                      "and operated by The Chenab Times Foundation (“we”, “us”, “our”).\n\n"
+                      "Welcome to The Chenab Times mobile application (\"App\"). The App is owned "
+                      "and operated by The Chenab Times Foundation (\"we\", \"us\", \"our\").\n\n"
                       "By downloading, installing, or using the App, you agree to be bound by "
                       "these Terms of Service.",
                       style: TextStyle(fontSize: 16, height: 1.4),
@@ -97,9 +97,9 @@ class _TermsScreenState extends State<TermsScreen> {
                     ),
                     SizedBox(height: 8),
                     Text(
-                      "• Account creation is optional and used only for backing up and restoring your saved articles.\n"
-                      "• All saved articles and reading data are stored exclusively on your device (on-device storage). "
-                      "We do not store, collect, or have access to your saved articles or reading history.",
+                      "• Account creation is optional and used for login, saved article sync, and leaderboard participation.\n"
+                      "• If you continue as a guest, saved articles stay on your device.\n"
+                      "• If you log in, saved articles and synced streak information may be stored on our server and restored when you log back into your account.",
                       style: TextStyle(fontSize: 16, height: 1.5),
                     ),
                     SizedBox(height: 20),
@@ -141,7 +141,7 @@ class _TermsScreenState extends State<TermsScreen> {
                     ),
                     SizedBox(height: 8),
                     Text(
-                      "The App is provided “as is”. We do not guarantee uninterrupted or error-free operation. "
+                      "The App is provided \"as is\". We do not guarantee uninterrupted or error-free operation. "
                       "To the maximum extent permitted by law, we shall not be liable for any indirect, "
                       "incidental, or consequential damages.",
                       style: TextStyle(fontSize: 16, height: 1.4),
@@ -228,7 +228,7 @@ class _TermsScreenState extends State<TermsScreen> {
                 child: const Text('Next'),
               )
             else
-              const SizedBox(height: 48), // To prevent layout jump
+              const SizedBox(height: 48),
           ],
         ),
       ),

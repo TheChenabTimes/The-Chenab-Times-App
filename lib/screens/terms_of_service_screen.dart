@@ -5,8 +5,8 @@ class TermsOfServiceScreen extends StatelessWidget {
   const TermsOfServiceScreen({super.key});
 
   final String termsHtml = '''
-  <h1>Terms of Service – The Chenab Times App</h1>
-  <p>Welcome to The Chenab Times mobile application (“App”). The App is owned and operated by The Chenab Times Foundation (“we”, “us”, “our”).</p>
+  <h1>Terms of Service - The Chenab Times App</h1>
+  <p>Welcome to The Chenab Times mobile application ("App"). The App is owned and operated by The Chenab Times Foundation ("we", "us", "our").</p>
   <p>By downloading, installing, or using the App, you agree to be bound by these Terms of Service.</p>
 
   <h2>1. Use of the App</h2>
@@ -23,8 +23,9 @@ class TermsOfServiceScreen extends StatelessWidget {
 
   <h2>3. User Account & Saved Articles</h2>
   <ul>
-    <li>Account creation is optional and used only for backing up and restoring your saved articles.</li>
-    <li>All saved articles and reading data are stored exclusively on your device (on-device storage). We do not store, collect, or have access to your Saved articles or reading history.</li>
+    <li>Account creation is optional and used for login, saved article sync, and leaderboard participation.</li>
+    <li>If you continue as a guest, saved articles stay on your device.</li>
+    <li>If you log in, saved articles and synced streak information may be stored on our server and restored when you log back into your account.</li>
   </ul>
 
   <h2>4. Prohibited Conduct</h2>
@@ -39,7 +40,7 @@ class TermsOfServiceScreen extends StatelessWidget {
   <p>We may suspend or terminate your access to the App at any time for violating these Terms.</p>
 
   <h2>6. Limitation of Liability</h2>
-  <p>The App is provided “as is”. We do not guarantee uninterrupted or error-free operation. To the maximum extent permitted by law, we shall not be liable for any indirect, incidental, or consequential damages.</p>
+  <p>The App is provided "as is". We do not guarantee uninterrupted or error-free operation. To the maximum extent permitted by law, we shall not be liable for any indirect, incidental, or consequential damages.</p>
 
   <h2>7. Governing Law</h2>
   <p>These Terms shall be governed by the laws of India. Any disputes shall be subject to the exclusive jurisdiction of courts in Doda, Jammu & Kashmir.</p>

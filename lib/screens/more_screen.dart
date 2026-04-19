@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:the_chenab_times/screens/about_us_screen.dart';
+import 'package:the_chenab_times/screens/leaderboard_screen.dart';
+import 'package:the_chenab_times/screens/login_screen.dart';
 import 'package:the_chenab_times/screens/privacy_policy_screen.dart';
+import 'package:the_chenab_times/screens/register_screen.dart';
 import 'package:the_chenab_times/screens/settings_screen.dart';
 import 'package:the_chenab_times/screens/terms_of_service_screen.dart';
+import 'package:the_chenab_times/services/auth_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// A screen that displays a list of additional options and links.
@@ -12,10 +17,78 @@ class MoreScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final authService = context.watch<AuthService>();
+
     return Scaffold(
       appBar: AppBar(title: const Text('More')),
       body: ListView(
         children: [
+          ListTile(
+            leading: Icon(
+              authService.isAuthenticated
+                  ? Icons.verified_user_outlined
+                  : Icons.login_rounded,
+            ),
+            title: Text(
+              authService.isAuthenticated
+                  ? (authService.currentUser?.name ?? 'My Account')
+                  : 'Log In',
+            ),
+            subtitle: Text(
+              authService.isAuthenticated
+                  ? (authService.currentUser?.email ?? '')
+                  : 'Sync saved articles and streaks',
+            ),
+            onTap: authService.isAuthenticated
+                ? null
+                : () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const LoginScreen(),
+                      ),
+                    );
+                  },
+          ),
+          if (!authService.isAuthenticated)
+            ListTile(
+              leading: const Icon(Icons.person_add_alt_1_outlined),
+              title: const Text('Create Account'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const RegisterScreen(),
+                  ),
+                );
+              },
+            ),
+          if (authService.isAuthenticated)
+            ListTile(
+              leading: const Icon(Icons.logout_rounded),
+              title: const Text('Log Out'),
+              onTap: () async {
+                await context.read<AuthService>().logout();
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Logged out successfully.')),
+                );
+              },
+            ),
+          const Divider(),
+          ListTile(
+            leading: const Icon(Icons.emoji_events_outlined),
+            title: const Text('Leaderboard'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const LeaderboardScreen(),
+                ),
+              );
+            },
+          ),
+          const Divider(),
           // A list tile for the "About Us" screen.
           ListTile(
             leading: const Icon(Icons.info_outline),

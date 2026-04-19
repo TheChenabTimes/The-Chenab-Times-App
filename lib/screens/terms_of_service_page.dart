@@ -13,23 +13,18 @@ class TermsOfServicePage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "Terms of Service – The Chenab Times App",
+              "Terms of Service - The Chenab Times App",
               style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
-
             SizedBox(height: 16),
-
             Text(
-              "Welcome to The Chenab Times mobile application (“App”). The App is owned "
-              "and operated by The Chenab Times Foundation (“we”, “us”, “our”).\n\n"
+              "Welcome to The Chenab Times mobile application (\"App\"). The App is owned "
+              "and operated by The Chenab Times Foundation (\"we\", \"us\", \"our\").\n\n"
               "By downloading, installing, or using the App, you agree to be bound by "
               "these Terms of Service.",
               style: TextStyle(fontSize: 16, height: 1.4),
             ),
-
             SizedBox(height: 20),
-
-            // Section 1
             Text(
               "1. Use of the App",
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
@@ -40,10 +35,7 @@ class TermsOfServicePage extends StatelessWidget {
               "• You are responsible for maintaining the confidentiality of your account credentials.",
               style: TextStyle(fontSize: 16, height: 1.5),
             ),
-
             SizedBox(height: 20),
-
-            // Section 2
             Text(
               "2. Content",
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
@@ -56,25 +48,19 @@ class TermsOfServicePage extends StatelessWidget {
               "redistribution, or commercial use is prohibited without prior written permission.",
               style: TextStyle(fontSize: 16, height: 1.5),
             ),
-
             SizedBox(height: 20),
-
-            // Section 3
             Text(
               "3. User Account & Saved Articles",
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
             SizedBox(height: 8),
             Text(
-              "• Account creation is optional and used only for backing up and restoring your saved articles.\n"
-              "• All saved articles and reading data are stored exclusively on your device (on-device storage). "
-              "We do not store, collect, or have access to your saved articles or reading history.",
+              "• Account creation is optional and used for login, saved article sync, and leaderboard participation.\n"
+              "• If you continue as a guest, saved articles stay on your device.\n"
+              "• If you log in, saved articles and synced streak information may be stored on our server and restored when you log back into your account.",
               style: TextStyle(fontSize: 16, height: 1.5),
             ),
-
             SizedBox(height: 20),
-
-            // Section 4
             Text(
               "4. Prohibited Conduct",
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
@@ -87,10 +73,7 @@ class TermsOfServicePage extends StatelessWidget {
               "• Attempt to gain unauthorized access to any portion of the App",
               style: TextStyle(fontSize: 16, height: 1.5),
             ),
-
             SizedBox(height: 20),
-
-            // Section 5
             Text(
               "5. Termination",
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
@@ -100,25 +83,19 @@ class TermsOfServicePage extends StatelessWidget {
               "We may suspend or terminate your access to the App at any time for violating these Terms.",
               style: TextStyle(fontSize: 16, height: 1.4),
             ),
-
             SizedBox(height: 20),
-
-            // Section 6
             Text(
               "6. Limitation of Liability",
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
             SizedBox(height: 8),
             Text(
-              "The App is provided “as is”. We do not guarantee uninterrupted or error-free operation. "
+              "The App is provided \"as is\". We do not guarantee uninterrupted or error-free operation. "
               "To the maximum extent permitted by law, we shall not be liable for any indirect, "
               "incidental, or consequential damages.",
               style: TextStyle(fontSize: 16, height: 1.4),
             ),
-
             SizedBox(height: 20),
-
-            // Section 7
             Text(
               "7. Governing Law",
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
@@ -129,10 +106,7 @@ class TermsOfServicePage extends StatelessWidget {
               "exclusive jurisdiction of courts in Doda, Jammu & Kashmir.",
               style: TextStyle(fontSize: 16, height: 1.4),
             ),
-
             SizedBox(height: 20),
-
-            // Section 8
             Text(
               "8. Changes to Terms",
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
@@ -143,15 +117,11 @@ class TermsOfServicePage extends StatelessWidget {
               "constitutes acceptance of the new Terms.",
               style: TextStyle(fontSize: 16, height: 1.4),
             ),
-
             SizedBox(height: 20),
-
-            // Contact
             Text(
               "Contact: contact+legal@thechenabtimes.com",
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
             ),
-
             SizedBox(height: 30),
           ],
         ),

@@ -64,13 +64,20 @@ class _ArticleScreenState extends State<ArticleScreen> {
   }
 
   Future<void> _toggleSave(SavedArticlesProvider provider) async {
-    final isSaved = provider.isArticleSaved(_currentArticle.link);
-    if (!isSaved) {
-      await provider.saveArticle(_currentArticle);
-      AppStatusHandler.showStatusToast(message: 'Article saved', type: StatusType.success);
-    } else {
-      await provider.deleteArticle(_currentArticle.id!, _currentArticle.link!);
-      AppStatusHandler.showStatusToast(message: 'Removed from saved articles', type: StatusType.info);
+    try {
+      final isSaved = provider.isArticleSaved(_currentArticle.link);
+      if (!isSaved) {
+        await provider.saveArticle(_currentArticle);
+        AppStatusHandler.showStatusToast(message: 'Article saved', type: StatusType.success);
+      } else {
+        await provider.deleteArticle(_currentArticle.link!);
+        AppStatusHandler.showStatusToast(message: 'Removed from saved articles', type: StatusType.info);
+      }
+    } catch (e) {
+      AppStatusHandler.showStatusToast(
+        message: '$e',
+        type: StatusType.error,
+      );
     }
   }
 

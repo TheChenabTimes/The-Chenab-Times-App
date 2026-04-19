@@ -1,53 +1,43 @@
 import 'dart:convert';
 
-class User {
-  final int? id;
-  final String username;
-  final String passwordHash;
-  final String? email;
-  final String? dob;
-  final String? gender;
-  final String? address;
-  final String? profilePicture;
+class UserModel {
+  final int id;
+  final String name;
+  final String email;
+  final String? photo;
+  final String loginType;
 
-  User({
-    this.id,
-    required this.username,
-    required this.passwordHash,
-    this.email,
-    this.dob,
-    this.gender,
-    this.address,
-    this.profilePicture,
+  const UserModel({
+    required this.id,
+    required this.name,
+    required this.email,
+    this.photo,
+    required this.loginType,
   });
 
-  factory User.fromMap(Map<String, dynamic> map) {
-    return User(
-      id: map['id'],
-      username: map['username'],
-      passwordHash: map['password_hash'],
-      email: map['email'],
-      dob: map['dob'],
-      gender: map['gender'],
-      address: map['address'],
-      profilePicture: map['profile_picture'],
+  factory UserModel.fromMap(Map<String, dynamic> map) {
+    return UserModel(
+      id: map['id'] is int ? map['id'] as int : int.parse('${map['id']}'),
+      name: '${map['name'] ?? ''}',
+      email: '${map['email'] ?? ''}',
+      photo: map['photo']?.toString(),
+      loginType: '${map['login_type'] ?? map['loginType'] ?? 'email'}',
     );
   }
 
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'username': username,
-      'password_hash': passwordHash,
+      'name': name,
       'email': email,
-      'dob': dob,
-      'gender': gender,
-      'address': address,
-      'profile_picture': profilePicture,
+      'photo': photo,
+      'login_type': loginType,
     };
   }
 
-  String toJson() => json.encode(toMap());
+  String toJson() => jsonEncode(toMap());
 
-  factory User.fromJson(String source) => User.fromMap(json.decode(source));
+  factory UserModel.fromJson(String source) {
+    return UserModel.fromMap(jsonDecode(source) as Map<String, dynamic>);
+  }
 }

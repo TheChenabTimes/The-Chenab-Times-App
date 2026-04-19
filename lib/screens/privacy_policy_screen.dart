@@ -5,46 +5,53 @@ class PrivacyPolicyScreen extends StatelessWidget {
   const PrivacyPolicyScreen({super.key});
 
   final String policyHtml = '''
-    <h1>Privacy Policy – The Chenab Times App</h1>
-    <p>The Chenab Times Foundation (“we”, “us”, “our”) respects your privacy. This Privacy Policy explains how the official The Chenab Times mobile app handles (or does not handle) your information.</p>
+    <h1>Privacy Policy - The Chenab Times App</h1>
+    <p>The Chenab Times Foundation ("we", "us", "our") respects your privacy. This Privacy Policy explains how the official The Chenab Times mobile app handles your information.</p>
 
     <h2>1. Information We Do NOT Collect</h2>
     <ul>
-        <li>We do NOT collect, store, or transmit your saved articles, reading history, or any personal reading preferences.</li>
-        <li>All saved articles and bookmarks are stored only on your device. We have zero access to this data.</li>
+        <li>We do NOT sell your personal data or use invasive analytics to track your individual reading behavior.</li>
+        <li>If you use the app without logging in, your saved articles remain on your device only.</li>
         <li>We do NOT use analytics tools that track individual users.</li>
     </ul>
 
     <h2>2. Information We Collect (Only When You Create an Account)</h2>
-    <p>When you create an optional account for backup/restore of saved articles:</p>
+    <p>When you create an optional account to sync app features:</p>
     <ul>
-        <li>Email address (used only for account creation and password reset)</li>
-        <li>Encrypted backup of your saved articles list (stored only for restore/transfer; we cannot decrypt or read it)</li>
+        <li>Name</li>
+        <li>Email address</li>
+        <li>Password, handled securely by our authentication system and never shown back to you in plain text</li>
+        <li>Saved articles linked to your account</li>
+        <li>Game streak totals that you choose to sync for leaderboard display</li>
     </ul>
 
     <h2>3. How We Use the Limited Data</h2>
     <ul>
-        <li>Email: only to send password reset links (if requested)</li>
-        <li>Encrypted backup: only to restore your saved list when you log in on the same or a new device</li>
+        <li>To create and maintain your optional account</li>
+        <li>To restore your saved articles when you log in</li>
+        <li>To sync your game streak to the in-app leaderboard</li>
+        <li>To keep your session active on your device until you log out or your token expires</li>
     </ul>
 
     <h2>4. Data Storage & Security</h2>
     <ul>
-        <li>Your saved articles never leave your phone unless you explicitly choose to back them up.</li>
-        <li>Backup data is end-to-end encrypted. Even our team cannot access it.</li>
+        <li>Guest saved articles remain on your device.</li>
+        <li>If you log in, your saved articles and synced streak information are stored on our server so they can be restored to your account.</li>
+        <li>Authentication tokens are stored securely on your device.</li>
+        <li>We take reasonable steps to protect account-related data in transit and at rest.</li>
     </ul>
 
     <h2>5. No Sharing with Third Parties</h2>
-    <p>We do not sell, rent, or share any personal information with third parties.</p>
+    <p>We do not sell, rent, or share personal information with third parties for advertising.</p>
 
     <h2>6. Push Notifications (Optional)</h2>
-    <p>If you enable notifications, we send only news alerts. No personal data is attached.</p>
+    <p>If you enable notifications, we send only news alerts. No personal profile data is attached to those notifications.</p>
 
-    <h2>7. Children’s Privacy</h2>
+    <h2>7. Children's Privacy</h2>
     <p>The App is not directed at children under 13. We do not knowingly collect data from children.</p>
 
     <h2>8. Changes to This Policy</h2>
-    <p>We may update this Privacy Policy. Changes will be posted in the App and on our website.</p>
+    <p>We may update this Privacy Policy. Changes will be posted in the app and on our website.</p>
 
     <h2>Contact Us</h2>
     <p>If you have any questions, you can contact us at contact@thechenabtimes.com.</p>

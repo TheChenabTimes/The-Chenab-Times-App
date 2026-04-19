@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:the_chenab_times/services/notification_provider.dart';
+import 'package:the_chenab_times/services/auth_service.dart';
 import 'package:the_chenab_times/services/rss_service.dart';
 import 'package:the_chenab_times/services/saved_articles_provider.dart';
 import 'l10n/app_localizations.dart';
@@ -163,33 +164,33 @@ void main() async {
             }
           }
         }
-
-        await ThemeService.instance.loadTheme();
-        await LanguageService.instance.init();
-        await notificationProvider
-            .loadNotifications(); // Load initial notifications
-        await notificationProvider.syncLatestPosts(
-          languageCode: LanguageService.instance.appLocale.languageCode,
-        );
-        await notificationProvider.loadNotifications();
-        // Background pre-fetch summaries
-        Future.delayed(const Duration(seconds: 3), () async {
-          try {
-            final articles = await RssService().fetchPostsPage(perPage: 10);
-            for (final article in articles.take(10)) {
-              await SummarizationService.instance.summarizeArticle(
-                article.content ?? article.excerpt ?? "",
-                articleLink: article.link,
-              );
-              await Future.delayed(const Duration(seconds: 2));
-            }
-          } catch (e) {
-            debugPrint("Prefetch error: $e");
-          }
-        });
       } catch (e) {
         debugPrint("Initialization error: $e");
       }
+
+      await ThemeService.instance.loadTheme();
+      await LanguageService.instance.init();
+      await AuthService.instance.init();
+      await notificationProvider.loadNotifications();
+      await notificationProvider.syncLatestPosts(
+        languageCode: LanguageService.instance.appLocale.languageCode,
+      );
+      await notificationProvider.loadNotifications();
+      // Background pre-fetch summaries
+      Future.delayed(const Duration(seconds: 3), () async {
+        try {
+          final articles = await RssService().fetchPostsPage(perPage: 10);
+          for (final article in articles.take(10)) {
+            await SummarizationService.instance.summarizeArticle(
+              article.content ?? article.excerpt ?? "",
+              articleLink: article.link,
+            );
+            await Future.delayed(const Duration(seconds: 2));
+          }
+        } catch (e) {
+          debugPrint("Prefetch error: $e");
+        }
+      });
 
       final dbService = DatabaseService();
 
@@ -198,9 +199,10 @@ void main() async {
           providers: [
             ChangeNotifierProvider.value(value: ThemeService.instance),
             ChangeNotifierProvider.value(value: LanguageService.instance),
+            ChangeNotifierProvider.value(value: AuthService.instance),
             ChangeNotifierProvider(create: (_) => LocationService()..init()),
             ChangeNotifierProvider(
-              create: (_) => SavedArticlesProvider(dbService),
+              create: (_) => SavedArticlesProvider(dbService, AuthService.instance),
             ),
             ChangeNotifierProvider.value(value: notificationProvider),
             Provider.value(value: dbService),
