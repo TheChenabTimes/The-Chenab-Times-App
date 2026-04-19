@@ -27,6 +27,7 @@ class _GamesScreenState extends State<GamesScreen>
   static const _lastSpellingKey = 'games_last_spelling_index';
   static const _lastCrosswordKey = 'games_last_crossword_index';
   static const _bestSyncedStreakKey = 'games_best_synced_streak';
+  static const _bestLocalScrambleStreakKey = 'games_best_local_scramble_streak';
 
   final Random _random = Random();
 
@@ -47,6 +48,7 @@ class _GamesScreenState extends State<GamesScreen>
   int _lastSpellingIndex = -1;
   int _lastCrosswordIndex = -1;
   int _bestSyncedStreak = 0;
+  int _bestLocalScrambleStreak = 0;
   int _sessionBestStreak = 0;
   bool _loading = true;
   bool _streakSyncPending = false;
@@ -93,7 +95,8 @@ class _GamesScreenState extends State<GamesScreen>
     _lastSpellingIndex = prefs.getInt(_lastSpellingKey) ?? -1;
     _lastCrosswordIndex = prefs.getInt(_lastCrosswordKey) ?? -1;
     _bestSyncedStreak = prefs.getInt(_bestSyncedStreakKey) ?? 0;
-    _sessionBestStreak = _scrambleStreak;
+    _bestLocalScrambleStreak = prefs.getInt(_bestLocalScrambleStreakKey) ?? 0;
+    _sessionBestStreak = max(_scrambleStreak, _bestLocalScrambleStreak);
 
     _scramblePuzzle = _nextScramblePuzzle();
     _vocabQuestion = _nextVocabQuestion();
@@ -119,6 +122,7 @@ class _GamesScreenState extends State<GamesScreen>
     await prefs.setInt(_lastSpellingKey, _lastSpellingIndex);
     await prefs.setInt(_lastCrosswordKey, _lastCrosswordIndex);
     await prefs.setInt(_bestSyncedStreakKey, _bestSyncedStreak);
+    await prefs.setInt(_bestLocalScrambleStreakKey, _bestLocalScrambleStreak);
   }
 
   int _nextDifferentIndex(int length, int lastIndex) {
@@ -702,6 +706,10 @@ class _GamesScreenState extends State<GamesScreen>
       setState(() {
         _scrambleStreak++;
         _sessionBestStreak = max(_sessionBestStreak, _scrambleStreak);
+        _bestLocalScrambleStreak = max(
+          _bestLocalScrambleStreak,
+          _sessionBestStreak,
+        );
         _streakSyncPending = _sessionBestStreak > _bestSyncedStreak;
         _scramblePuzzle = _nextScramblePuzzle();
         _scrambleController.clear();
@@ -711,6 +719,11 @@ class _GamesScreenState extends State<GamesScreen>
       final sessionPeak = max(_sessionBestStreak, _scrambleStreak);
       setState(() => _scrambleStreak = 0);
       _sessionBestStreak = max(_sessionBestStreak, sessionPeak);
+      _bestLocalScrambleStreak = max(
+        _bestLocalScrambleStreak,
+        _sessionBestStreak,
+      );
+      _streakSyncPending = _bestLocalScrambleStreak > _bestSyncedStreak;
       _showFeedback(
         'Try again. Hint: ${_scramblePuzzle.hint}',
         isSuccess: false,
@@ -1057,7 +1070,11 @@ class _GamesScreenState extends State<GamesScreen>
     if (_syncingStreak || !_streakSyncPending) return;
 
     final authService = AuthService.instance;
-    final streakToSync = max(_sessionBestStreak, _scrambleStreak);
+    final streakToSync = [
+      _bestLocalScrambleStreak,
+      _sessionBestStreak,
+      _scrambleStreak,
+    ].reduce((a, b) => a > b ? a : b);
     if (!authService.isAuthenticated || streakToSync <= _bestSyncedStreak) {
       return;
     }

@@ -42,6 +42,7 @@ class AuthService extends ChangeNotifier {
   static const String _tokenKey = 'auth_token';
   static const String _userKey = 'auth_user';
   static const String _bestSyncedStreakKey = 'games_best_synced_streak';
+  static const String _bestLocalStreakKey = 'games_best_local_scramble_streak';
 
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
   final http.Client _client = http.Client();
@@ -211,9 +212,14 @@ class AuthService extends ChangeNotifier {
 
     final prefs = await SharedPreferences.getInstance();
     final localStreak = prefs.getInt('games_scramble_streak') ?? 0;
+    final bestLocalStreak = prefs.getInt(_bestLocalStreakKey) ?? 0;
     final bestSynced = prefs.getInt(_bestSyncedStreakKey) ?? 0;
-    final streakToSync = localStreak > bestSynced ? localStreak : 0;
-    if (streakToSync > 0) {
+    final streakToSync = [
+      localStreak,
+      bestLocalStreak,
+      bestSynced,
+    ].reduce((a, b) => a > b ? a : b);
+    if (streakToSync > bestSynced) {
       await syncStreak(streakToSync);
     }
   }
