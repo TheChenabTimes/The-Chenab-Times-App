@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:the_chenab_times/models/article_model.dart';
 import 'package:the_chenab_times/services/saved_articles_provider.dart';
 import 'package:the_chenab_times/widgets/article_list_item.dart';
 

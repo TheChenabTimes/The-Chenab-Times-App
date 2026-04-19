@@ -72,8 +72,11 @@ class MoreScreen extends StatelessWidget {
             title: const Text('Share App'),
             onTap: () {
               // TODO: Replace with your app's link
-              Share.share(
-                'Check out The Chenab Times app: https://play.google.com/store/apps/details?id=com.thechenabtimes.app',
+              SharePlus.instance.share(
+                ShareParams(
+                  text:
+                      'Check out The Chenab Times app: https://play.google.com/store/apps/details?id=com.thechenabtimes.app',
+                ),
               );
             },
           ),

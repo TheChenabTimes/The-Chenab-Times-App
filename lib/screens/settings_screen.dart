@@ -91,6 +91,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     BuildContext context,
     ThemeService themeService,
   ) async {
+    ThemeMode selectedTheme = themeService.themeMode;
     await showDialog<void>(
       context: context,
       builder: (BuildContext context) {
@@ -102,41 +103,48 @@ class _SettingsScreenState extends State<SettingsScreen> {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              RadioListTile<ThemeMode>(
-                title: const Text('Light'),
-                value: ThemeMode.light,
-                groupValue: themeService.themeMode,
-                onChanged: (ThemeMode? value) {
-                  if (value != null) {
-                    themeService.setTheme(value);
-                    Navigator.of(context).pop();
-                  }
-                },
-              ),
-              RadioListTile<ThemeMode>(
-                title: const Text('Dark'),
-                value: ThemeMode.dark,
-                groupValue: themeService.themeMode,
-                onChanged: (ThemeMode? value) {
-                  if (value != null) {
-                    themeService.setTheme(value);
-                    Navigator.of(context).pop();
-                  }
-                },
-              ),
-              RadioListTile<ThemeMode>(
-                title: const Text('System Default'),
-                value: ThemeMode.system,
-                groupValue: themeService.themeMode,
-                onChanged: (ThemeMode? value) {
-                  if (value != null) {
-                    themeService.setTheme(value);
-                    Navigator.of(context).pop();
-                  }
+              StatefulBuilder(
+                builder: (context, setState) {
+                  return SegmentedButton<ThemeMode>(
+                    segments: const [
+                      ButtonSegment(
+                        value: ThemeMode.light,
+                        label: Text('Light'),
+                        icon: Icon(Icons.light_mode_outlined),
+                      ),
+                      ButtonSegment(
+                        value: ThemeMode.dark,
+                        label: Text('Dark'),
+                        icon: Icon(Icons.dark_mode_outlined),
+                      ),
+                      ButtonSegment(
+                        value: ThemeMode.system,
+                        label: Text('System'),
+                        icon: Icon(Icons.settings_suggest_outlined),
+                      ),
+                    ],
+                    selected: {selectedTheme},
+                    onSelectionChanged: (selection) {
+                      setState(() => selectedTheme = selection.first);
+                    },
+                  );
                 },
               ),
             ],
           ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () {
+                themeService.setTheme(selectedTheme);
+                Navigator.of(context).pop();
+              },
+              child: const Text('Apply'),
+            ),
+          ],
         );
       },
     );

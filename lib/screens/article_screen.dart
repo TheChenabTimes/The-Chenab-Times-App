@@ -1,7 +1,6 @@
 import 'dart:developer';
 import 'dart:io';
 import 'dart:typed_data';
-import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:http/http.dart' as http;
@@ -128,9 +127,11 @@ class _ArticleScreenState extends State<ArticleScreen> {
           await imageFile.writeAsBytes(image);
 
           // Updated to use the non-deprecated SharePlus pattern
-          await Share.shareXFiles(
-            [XFile(path)],
-            text: 'Check out this article from The Chenab Times!',
+          await SharePlus.instance.share(
+            ShareParams(
+              files: [XFile(path)],
+              text: 'Check out this article from The Chenab Times!',
+            ),
           );
         }
       }

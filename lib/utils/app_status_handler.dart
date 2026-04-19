@@ -21,7 +21,6 @@ class AppStatusHandler {
         backgroundColor = Colors.orange;
         break;
       case StatusType.info:
-      default:
         backgroundColor = Colors.black;
         break;
     }

@@ -270,7 +270,7 @@ class _ArticleListTabState extends State<ArticleListTab> {
                                 decoration: BoxDecoration(
                                   color: const Color(
                                     0xFFEEE1C7,
-                                  ).withOpacity(0.95),
+                                  ).withValues(alpha: 0.95),
                                   borderRadius: BorderRadius.circular(14),
                                 ),
                                 child: const Text(
@@ -349,7 +349,7 @@ class _ArticleListTabState extends State<ArticleListTab> {
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.14),
+                  color: Colors.white.withValues(alpha: 0.14),
                   borderRadius: BorderRadius.circular(999),
                 ),
                 child: const Text(

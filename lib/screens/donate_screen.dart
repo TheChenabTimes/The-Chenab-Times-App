@@ -348,7 +348,7 @@ class _DonateScreenState extends State<DonateScreen> {
             const SizedBox(height: 20),
             CircleAvatar(
               radius: 40,
-              backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
+              backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.1),
               child: Icon(
                 Icons.volunteer_activism,
                 color: theme.colorScheme.primary,
@@ -428,7 +428,7 @@ class _DonateScreenState extends State<DonateScreen> {
       margin: const EdgeInsets.only(bottom: 16),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       elevation: 2,
-      shadowColor: theme.colorScheme.primary.withOpacity(0.1),
+      shadowColor: theme.colorScheme.primary.withValues(alpha: 0.1),
       child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
