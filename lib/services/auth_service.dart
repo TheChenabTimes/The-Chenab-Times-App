@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -107,7 +108,9 @@ class AuthService extends ChangeNotifier {
 
       final user = UserModel.fromMap(userMap);
       await _persistSession(token: token, user: user);
-      await syncLocalBestStreak();
+      try {
+        await syncLocalBestStreak();
+      } catch (_) {}
       return user;
     } on AuthException {
       rethrow;
@@ -138,7 +141,9 @@ class AuthService extends ChangeNotifier {
           payload['user'] is Map<String, dynamic>) {
         final user = UserModel.fromMap(payload['user'] as Map<String, dynamic>);
         await _persistSession(token: '${payload['token']}', user: user);
-        await syncLocalBestStreak();
+        try {
+          await syncLocalBestStreak();
+        } catch (_) {}
         return user;
       }
 
@@ -209,13 +214,27 @@ class AuthService extends ChangeNotifier {
   Future<void> syncStreak(int streak) async {
     if (!isAuthenticated || streak <= 0) return;
 
-    await _authorizedPost('/streak/update.php', body: {'streak': streak});
-
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt(_bestSyncedStreakKey, streak);
-    if (streak > _serverBestStreakHint) {
-      _serverBestStreakHint = streak;
-    }
+    final localStreak = prefs.getInt('games_scramble_streak') ?? 0;
+    final bestLocalStreak = prefs.getInt(_bestLocalStreakKey) ?? 0;
+    final bestSyncedStreak = prefs.getInt(_bestSyncedStreakKey) ?? 0;
+    final knownServerStreak = math.max(
+      _serverBestStreakHint,
+      _currentUser?.bestStreak ?? 0,
+    );
+    final mergedStreak = [
+      streak,
+      localStreak,
+      bestLocalStreak,
+      bestSyncedStreak,
+      knownServerStreak,
+    ].reduce(math.max);
+
+    await _persistMergedLocalStreak(prefs, mergedStreak);
+    await _authorizedPost('/streak/update.php', body: {'streak': mergedStreak});
+    await prefs.setInt(_bestSyncedStreakKey, mergedStreak);
+    _serverBestStreakHint = math.max(_serverBestStreakHint, mergedStreak);
+    await _updatePersistedUserBestStreak(mergedStreak);
     _streakSyncVersion++;
     notifyListeners();
   }
@@ -226,21 +245,13 @@ class AuthService extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     final localStreak = prefs.getInt('games_scramble_streak') ?? 0;
     final bestLocalStreak = prefs.getInt(_bestLocalStreakKey) ?? 0;
-    final bestSyncedStreak = prefs.getInt(_bestSyncedStreakKey) ?? 0;
     final serverBestStreak = await fetchServerBestStreak();
-    final knownServerStreak = serverBestStreak > bestSyncedStreak
-        ? serverBestStreak
-        : bestSyncedStreak;
-    final mergedStreak = [
-      localStreak,
-      bestLocalStreak,
-      bestSyncedStreak,
+    final mergedStreak = math.max(
+      math.max(localStreak, bestLocalStreak),
       serverBestStreak,
-    ].reduce((a, b) => a > b ? a : b);
+    );
 
-    await prefs.setInt('games_scramble_streak', mergedStreak);
-    await prefs.setInt(_bestLocalStreakKey, mergedStreak);
-    await prefs.setInt(_bestSyncedStreakKey, knownServerStreak);
+    await _persistMergedLocalStreak(prefs, mergedStreak);
 
     if (mergedStreak > 0) {
       await syncStreak(mergedStreak);
@@ -399,6 +410,28 @@ class AuthService extends ChangeNotifier {
     await _secureStorage.write(key: _tokenKey, value: token);
     await _secureStorage.write(key: _userKey, value: user.toJson());
     notifyListeners();
+  }
+
+  Future<void> _persistMergedLocalStreak(
+    SharedPreferences prefs,
+    int mergedStreak,
+  ) async {
+    await prefs.setInt('games_scramble_streak', mergedStreak);
+    await prefs.setInt(_bestLocalStreakKey, mergedStreak);
+  }
+
+  Future<void> _updatePersistedUserBestStreak(int streak) async {
+    if (_currentUser == null || streak <= _currentUser!.bestStreak) return;
+
+    _currentUser = UserModel(
+      id: _currentUser!.id,
+      name: _currentUser!.name,
+      email: _currentUser!.email,
+      photo: _currentUser!.photo,
+      loginType: _currentUser!.loginType,
+      bestStreak: streak,
+    );
+    await _secureStorage.write(key: _userKey, value: _currentUser!.toJson());
   }
 
   String _normalizeIdentity(String value) {

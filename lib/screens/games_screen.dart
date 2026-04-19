@@ -133,10 +133,6 @@ class _GamesScreenState extends State<GamesScreen> with WidgetsBindingObserver {
     try {
       await AuthService.instance.syncLocalBestStreak();
       await _loadProgress();
-      if (_streakSyncPending) {
-        await _flushStreakSync();
-        await _loadProgress();
-      }
     } catch (_) {}
   }
 
@@ -746,9 +742,7 @@ class _GamesScreenState extends State<GamesScreen> with WidgetsBindingObserver {
         _scrambleController.clear();
       });
       _showFeedback('Correct! Great spelling.', isSuccess: true);
-      if (AuthService.instance.isAuthenticated && _streakSyncPending) {
-        _flushStreakSync();
-      }
+      _saveProgress().then((_) => _flushStreakSync());
     } else {
       final sessionPeak = max(_sessionBestStreak, _scrambleStreak);
       setState(() => _scrambleStreak = 0);
@@ -762,7 +756,8 @@ class _GamesScreenState extends State<GamesScreen> with WidgetsBindingObserver {
         'Try again. Hint: ${_scramblePuzzle.hint}',
         isSuccess: false,
       );
-      _flushStreakSync();
+      _saveProgress().then((_) => _flushStreakSync());
+      return;
     }
     _saveProgress();
   }
@@ -1258,7 +1253,8 @@ class _GamesScreenState extends State<GamesScreen> with WidgetsBindingObserver {
     _syncingStreak = true;
     try {
       await authService.syncStreak(streakToSync);
-      _bestSyncedStreak = streakToSync;
+      _bestSyncedStreak = max(_bestSyncedStreak, streakToSync);
+      _bestLocalScrambleStreak = max(_bestLocalScrambleStreak, streakToSync);
       _streakSyncPending = false;
       await _saveProgress();
     } catch (_) {
