@@ -78,33 +78,17 @@ class RssService {
     String? languageCode,
     DateTime? after,
   }) async {
-    var url = '$postsBaseUrl?page=$page&per_page=$perPage&_embed=true';
-    if (languageCode != null && languageCode != 'en') {
-      url += '&lang=$languageCode';
-    }
-    if (after != null) {
-      url +=
-          '&after=${Uri.encodeQueryComponent(after.toUtc().toIso8601String())}';
-    }
-    final uri = Uri.parse(url);
-    try {
-      final resp = await http
-          .get(uri, headers: _headers)
-          .timeout(const Duration(seconds: 15));
-      if (resp.statusCode == 200) {
-        final List data = json.decode(resp.body);
-        return data
-            .map((e) => Article.fromJson(e as Map<String, dynamic>))
-            .toList();
-      } else if (resp.statusCode == 400) {
-        return [];
-      } else {
-        throw Exception('Failed to load posts (status ${resp.statusCode})');
-      }
-    } catch (e) {
-      log("Error fetching posts: $e");
-      return [];
-    }
+    final query = <String, String>{
+      'page': '$page',
+      'per_page': '$perPage',
+      '_embed': 'true',
+      if (after != null) 'after': after.toUtc().toIso8601String(),
+    };
+    return _fetchPostsWithLanguageFallback(
+      query,
+      languageCode: languageCode,
+      logLabel: 'posts',
+    );
   }
 
   /// Fetch posts for a specific category
@@ -115,16 +99,47 @@ class RssService {
     String? languageCode,
     DateTime? after,
   }) async {
-    var url =
-        '$postsBaseUrl?categories=$categoryId&page=$page&per_page=$perPage&_embed=true';
-    if (languageCode != null && languageCode != 'en') {
-      url += '&lang=$languageCode';
+    final query = <String, String>{
+      'categories': '$categoryId',
+      'page': '$page',
+      'per_page': '$perPage',
+      '_embed': 'true',
+      if (after != null) 'after': after.toUtc().toIso8601String(),
+    };
+    return _fetchPostsWithLanguageFallback(
+      query,
+      languageCode: languageCode,
+      logLabel: 'category $categoryId posts',
+    );
+  }
+
+  Future<List<Article>> _fetchPostsWithLanguageFallback(
+    Map<String, String> query, {
+    String? languageCode,
+    required String logLabel,
+  }) async {
+    final shouldTryLanguage = languageCode != null && languageCode != 'en';
+    if (shouldTryLanguage) {
+      final localizedItems = await _fetchPosts({
+        ...query,
+        'lang': languageCode,
+      }, logLabel: '$logLabel ($languageCode)');
+      if (localizedItems.isNotEmpty) {
+        return localizedItems;
+      }
+      log(
+        'No localized $logLabel found for $languageCode; retrying English/default feed',
+      );
     }
-    if (after != null) {
-      url +=
-          '&after=${Uri.encodeQueryComponent(after.toUtc().toIso8601String())}';
-    }
-    final uri = Uri.parse(url);
+
+    return _fetchPosts(query, logLabel: logLabel);
+  }
+
+  Future<List<Article>> _fetchPosts(
+    Map<String, String> query, {
+    required String logLabel,
+  }) async {
+    final uri = Uri.parse(postsBaseUrl).replace(queryParameters: query);
     try {
       final resp = await http
           .get(uri, headers: _headers)
@@ -135,12 +150,14 @@ class RssService {
             .map((e) => Article.fromJson(e as Map<String, dynamic>))
             .toList();
       } else if (resp.statusCode == 400) {
+        log('No more $logLabel: status ${resp.statusCode}');
         return [];
       } else {
-        throw Exception('Failed to load posts (status ${resp.statusCode})');
+        log('Failed to load $logLabel: status ${resp.statusCode}');
+        return [];
       }
     } catch (e) {
-      log("Error fetching category posts: $e");
+      log('Error fetching $logLabel: $e');
       return [];
     }
   }
