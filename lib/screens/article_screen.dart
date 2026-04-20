@@ -19,6 +19,7 @@ class ArticleScreen extends StatefulWidget {
 
 class _ArticleScreenState extends State<ArticleScreen> {
   late int index;
+
   String? summary;
   bool loading = true;
 
@@ -32,170 +33,228 @@ class _ArticleScreenState extends State<ArticleScreen> {
   }
 
   Future<void> loadSummary() async {
-    final result =
-        await SummarizationService.instance.summarizeArticle(
-      article.content ?? '',
-      articleLink: article.link,
-      excerpt: article.excerpt,
-    );
+    try {
+      final result =
+          await SummarizationService.instance.summarizeArticle(
+        article.content ?? '',
+        articleLink: article.link,
+        excerpt: article.excerpt,
+      );
 
-    if (!mounted) return;
-
-    setState(() {
-      summary = result;
-      loading = false;
-    });
+      setState(() {
+        summary = result;
+        loading = false;
+      });
+    } catch (e) {
+      setState(() {
+        summary = article.excerpt;
+        loading = false;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final title =
+        HtmlHelper.stripAndUnescape(article.title ?? '');
+
+    final imageUrl =
+        article.featuredImage ??
+        article.imageUrl ??
+        '';
+
     return Scaffold(
-      backgroundColor: const Color(0xfff5efe6),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
+      backgroundColor: const Color(0xfff6f1eb),
 
-              /// HEADER IMAGE
-              ClipRRect(
-                borderRadius: BorderRadius.circular(18),
-                child: Stack(
-                  alignment: Alignment.bottomLeft,
-                  children: [
+      appBar: AppBar(
+        backgroundColor: const Color(0xfff6f1eb),
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text(
+          "THE CHENAB TIMES",
+          style: TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1.2,
+          ),
+        ),
+        centerTitle: true,
+      ),
 
-                    Image.network(
-                      article.image ?? '',
-                      width: double.infinity,
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+
+            /// IMAGE
+            if (imageUrl.isNotEmpty)
+              Stack(
+                children: [
+                  Image.network(
+                    imageUrl,
+                    width: double.infinity,
+                    height: 220,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
                       height: 220,
-                      fit: BoxFit.cover,
+                      color: Colors.grey.shade300,
                     ),
+                  ),
 
-                    Container(
-                      padding: const EdgeInsets.all(14),
+                  Positioned(
+                    bottom: 12,
+                    left: 12,
+                    right: 12,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 8,
+                        horizontal: 12,
+                      ),
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            Colors.black.withOpacity(.6),
-                            Colors.transparent
-                          ],
-                          begin: Alignment.bottomCenter,
-                          end: Alignment.topCenter,
-                        ),
+                        color: Colors.black54,
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       child: const Text(
                         "Quick summary crafted for fast reading",
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 14,
+                          fontSize: 13,
                         ),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
 
-              const SizedBox(height: 18),
+            const SizedBox(height: 16),
 
-              /// SUMMARY CARD
-              Container(
-                margin: const EdgeInsets.symmetric(horizontal: 16),
+            /// CARD
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Container(
                 padding: const EdgeInsets.all(18),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: const Color(0xfff8f3ed),
                   borderRadius: BorderRadius.circular(18),
-                  boxShadow: [
-                    BoxShadow(
-                      blurRadius: 14,
-                      color: Colors.black.withOpacity(.05),
-                    )
-                  ],
+                  border: Border.all(
+                    color: const Color(0xffe6d7c9),
+                  ),
                 ),
+
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment:
+                      CrossAxisAlignment.start,
                   children: [
 
-                    /// TITLE CHIP
+                    /// LABEL
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 6),
+                        horizontal: 14,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
-                        color: const Color(0xff8d1b1b),
-                        borderRadius: BorderRadius.circular(50),
+                        color: const Color(0xff9f1d1d),
+                        borderRadius:
+                            BorderRadius.circular(40),
                       ),
                       child: const Text(
                         "READ IN SHORT",
                         style: TextStyle(
                           color: Colors.white,
-                          fontWeight: FontWeight.bold,
                           fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.8,
                         ),
                       ),
                     ),
 
                     const SizedBox(height: 16),
 
-                    /// LOADER
-                    if (loading)
-                      Column(
-                        children: const [
-                          SizedBox(height: 20),
-                          CircularProgressIndicator(),
-                          SizedBox(height: 12),
-                          Text(
-                            "Preparing your short summary...",
-                            style: TextStyle(fontSize: 14),
-                          )
-                        ],
-                      )
+                    /// TITLE
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        height: 1.25,
+                      ),
+                    ),
 
-                    /// SUMMARY TEXT
-                    else if (summary != null)
+                    const SizedBox(height: 16),
+
+                    /// SUMMARY BOX
+                    if (loading)
+                      const Padding(
+                        padding: EdgeInsets.symmetric(
+                            vertical: 20),
+                        child: Center(
+                          child:
+                              CircularProgressIndicator(),
+                        ),
+                      )
+                    else if (summary != null &&
+                        summary!.trim().isNotEmpty)
                       Text(
-                        HtmlHelper.stripAndUnescape(summary!),
+                        HtmlHelper.stripAndUnescape(
+                            summary!),
                         style: const TextStyle(
                           fontSize: 16,
                           height: 1.6,
                           color: Colors.black87,
                         ),
                       )
-
-                    /// FINAL FALLBACK
                     else
                       const Text(
-                        "Summary not available at the moment.",
-                        style: TextStyle(fontSize: 15),
+                        "Summary not available at this moment. Please read full article.",
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.black54,
+                        ),
                       ),
+
+                    const SizedBox(height: 22),
+
+                    /// READ FULL BUTTON
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              const Color(0xff9f1d1d),
+                          padding:
+                              const EdgeInsets.symmetric(
+                                  vertical: 14),
+                          shape:
+                              RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.circular(
+                                    30),
+                          ),
+                        ),
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        child: const Text(
+                          "Read Full Article",
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.white,
+                            fontWeight:
+                                FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
+            ),
 
-              const SizedBox(height: 20),
-
-              /// FULL ARTICLE BUTTON
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xff8d1b1b),
-                    minimumSize: const Size(double.infinity, 52),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                  ),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: const Text(
-                    "Read Full Article",
-                    style: TextStyle(fontSize: 16),
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 40),
-            ],
-          ),
+            const SizedBox(height: 40),
+          ],
         ),
       ),
     );
