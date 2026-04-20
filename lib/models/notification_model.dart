@@ -11,6 +11,7 @@ class NotificationModel {
   final DateTime receivedAt;
   final Article? article;
   final int? postId; // [NEW] Added to store the WordPress Post ID
+  final String? postUrl;
 
   NotificationModel({
     this.id,
@@ -21,6 +22,7 @@ class NotificationModel {
     required this.receivedAt,
     this.article,
     this.postId,
+    this.postUrl,
   });
 
   factory NotificationModel.fromMap(Map<String, dynamic> map) {
@@ -53,6 +55,7 @@ class NotificationModel {
           : DateTime.now(),
       article: parsedArticle,
       postId: _parsePostId(map['post_id']),
+      postUrl: map['post_url']?.toString(),
     );
   }
 
@@ -73,6 +76,7 @@ class NotificationModel {
       'received_at': receivedAt.toIso8601String(),
       'article_data': article != null ? json.encode(article!.toJson()) : null,
       'post_id': postId, // Added to map
+      'post_url': postUrl,
     };
   }
 }

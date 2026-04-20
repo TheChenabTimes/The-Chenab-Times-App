@@ -22,7 +22,7 @@ class DatabaseService {
     final path = join(dbPath, 'the_chenab_times.db');
     return await openDatabase(
       path,
-      version: 7,
+      version: 8,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -67,6 +67,9 @@ class DatabaseService {
     if (oldVersion < 7) {
       await db.execute('ALTER TABLE notifications ADD COLUMN post_id INTEGER');
     }
+    if (oldVersion < 8) {
+      await db.execute('ALTER TABLE notifications ADD COLUMN post_url TEXT');
+    }
   }
 
   Future<void> _createTables(Database db) async {
@@ -110,10 +113,11 @@ class DatabaseService {
       body TEXT NOT NULL,
       image_url TEXT,
       received_at TEXT NOT NULL,
-      article_data TEXT,
-      post_id INTEGER
-    )
-    ''');
+        article_data TEXT,
+        post_id INTEGER,
+        post_url TEXT
+      )
+      ''');
   }
 
   // User Methods

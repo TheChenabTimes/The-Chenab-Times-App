@@ -52,8 +52,10 @@ class _NotificationScreenState extends State<NotificationScreen> {
       return;
     }
 
-    // 2. If we don't have the article, but we have the Post ID, fetch it now.
-    if (notification.postId != null) {
+    // 2. If we don't have the article, fetch it from any article hint we have.
+    if (notification.postId != null ||
+        (notification.postUrl ?? '').isNotEmpty ||
+        notification.title.trim().isNotEmpty) {
       // Show a loading spinner dialog
       showDialog(
         context: context,
@@ -61,10 +63,37 @@ class _NotificationScreenState extends State<NotificationScreen> {
         builder: (c) => const Center(child: CircularProgressIndicator()),
       );
 
-      // Fetch from API
-      Article? fetchedArticle = await RssService().fetchArticleById(
-        notification.postId!,
-      );
+      final languageCode = context
+          .read<LanguageService>()
+          .appLocale
+          .languageCode;
+      final rss = RssService();
+      Article? fetchedArticle;
+
+      if (notification.postId != null) {
+        fetchedArticle = await rss.fetchArticleById(
+          notification.postId!,
+          languageCode: languageCode,
+        );
+      }
+
+      if (fetchedArticle == null && (notification.postUrl ?? '').isNotEmpty) {
+        fetchedArticle = await rss.fetchArticleByUrl(
+          notification.postUrl!,
+          languageCode: languageCode,
+        );
+      }
+
+      if (fetchedArticle == null && notification.title.trim().isNotEmpty) {
+        final matches = await rss.searchPosts(
+          notification.title,
+          perPage: 5,
+          languageCode: languageCode,
+        );
+        if (matches.isNotEmpty) {
+          fetchedArticle = matches.first;
+        }
+      }
 
       // Hide loading spinner
       if (Navigator.of(context).canPop()) {

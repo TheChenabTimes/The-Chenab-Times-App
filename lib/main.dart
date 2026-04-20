@@ -44,6 +44,13 @@ int? _parseNotificationPostId(Map<String, dynamic> data) {
   return int.tryParse(value.toString().trim());
 }
 
+String? _parseNotificationPostUrl(Map<String, dynamic> data) {
+  final value = data['post_url'] ?? data['url'] ?? data['link'];
+  final url = value?.toString().trim();
+  if (url == null || url.isEmpty) return null;
+  return url;
+}
+
 void _openChenabLinkInApp(String? link) {
   unawaited(_openChenabLinkInAppAsync(link));
 }
@@ -101,6 +108,7 @@ Future<void> _firebaseBackgroundHandler(RemoteMessage message) async {
       receivedAt: DateTime.now(),
       article: null,
       postId: _parseNotificationPostId(data),
+      postUrl: _parseNotificationPostUrl(data),
     );
     await notificationProvider.addNotification(model);
   }
@@ -151,6 +159,7 @@ void main() async {
               receivedAt: DateTime.now(),
               article: null,
               postId: _parseNotificationPostId(data),
+              postUrl: _parseNotificationPostUrl(data),
             );
             await notificationProvider.addNotification(model);
             // Show rich notification with image
