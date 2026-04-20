@@ -101,11 +101,12 @@ class _NotificationScreenState extends State<NotificationScreen> {
       }
 
       if (fetchedArticle != null) {
+        final article = fetchedArticle;
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) =>
-                ArticleScreen(articles: [fetchedArticle], initialIndex: 0),
+                ArticleScreen(articles: [article], initialIndex: 0),
           ),
         );
       } else {
