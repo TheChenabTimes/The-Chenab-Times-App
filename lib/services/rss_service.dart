@@ -8,6 +8,12 @@ class RssService {
   final String pagesBaseUrl = 'https://thechenabtimes.com/wp-json/wp/v2/pages';
   final String categoriesBaseUrl =
       'https://thechenabtimes.com/wp-json/wp/v2/categories';
+  static const Map<String, String> _headers = {
+    'Accept': 'application/json',
+    'User-Agent':
+        'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 '
+        '(KHTML, like Gecko) TheChenabTimesApp/1.0 Mobile Safari/537.36',
+  };
 
   /// [NEW] Fetch a single article by its ID.
   /// This is used when a notification comes with a specific Post ID.
@@ -18,7 +24,9 @@ class RssService {
     }
     final uri = Uri.parse(url);
     try {
-      final resp = await http.get(uri).timeout(const Duration(seconds: 15));
+      final resp = await http
+          .get(uri, headers: _headers)
+          .timeout(const Duration(seconds: 15));
       if (resp.statusCode == 200) {
         final Map<String, dynamic> data = json.decode(resp.body);
         return Article.fromJson(data);
@@ -50,7 +58,7 @@ class RssService {
 
     try {
       final resp = await http
-          .get(Uri.parse(requestUrl))
+          .get(Uri.parse(requestUrl), headers: _headers)
           .timeout(const Duration(seconds: 15));
       if (resp.statusCode != 200) return null;
 
@@ -80,7 +88,9 @@ class RssService {
     }
     final uri = Uri.parse(url);
     try {
-      final resp = await http.get(uri).timeout(const Duration(seconds: 15));
+      final resp = await http
+          .get(uri, headers: _headers)
+          .timeout(const Duration(seconds: 15));
       if (resp.statusCode == 200) {
         final List data = json.decode(resp.body);
         return data
@@ -116,7 +126,9 @@ class RssService {
     }
     final uri = Uri.parse(url);
     try {
-      final resp = await http.get(uri).timeout(const Duration(seconds: 15));
+      final resp = await http
+          .get(uri, headers: _headers)
+          .timeout(const Duration(seconds: 15));
       if (resp.statusCode == 200) {
         final List data = json.decode(resp.body);
         return data
@@ -139,7 +151,9 @@ class RssService {
       '$pagesBaseUrl?search=${Uri.encodeQueryComponent(searchTerm)}&_embed=true',
     );
     try {
-      final resp = await http.get(uri).timeout(const Duration(seconds: 15));
+      final resp = await http
+          .get(uri, headers: _headers)
+          .timeout(const Duration(seconds: 15));
       if (resp.statusCode == 200) {
         final List data = json.decode(resp.body);
         if (data.isNotEmpty) {
@@ -166,7 +180,7 @@ class RssService {
     }
     final uri = Uri.parse(url);
     try {
-      final resp = await http.get(uri);
+      final resp = await http.get(uri, headers: _headers);
       if (resp.statusCode == 200) {
         final List data = json.decode(resp.body);
         return data
@@ -189,7 +203,9 @@ class RssService {
       '$categoriesBaseUrl?search=${Uri.encodeQueryComponent(query)}&per_page=$perPage',
     );
     try {
-      final resp = await http.get(uri).timeout(const Duration(seconds: 15));
+      final resp = await http
+          .get(uri, headers: _headers)
+          .timeout(const Duration(seconds: 15));
       if (resp.statusCode == 200) {
         final List data = json.decode(resp.body);
         return data.cast<Map<String, dynamic>>();

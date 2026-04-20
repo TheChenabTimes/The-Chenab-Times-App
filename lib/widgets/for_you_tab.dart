@@ -180,7 +180,7 @@ class _ForYouTabState extends State<ForYouTab> {
     final stateCategoryId = await _resolveStateCategoryId();
     final countryCategoryId = await _resolveCountryCategoryId();
     final internationalCategoryId = await _resolveInternationalCategoryId();
-    final recentPosts = await _rss.fetchPostsPage(
+    var recentPosts = await _rss.fetchPostsPage(
       perPage: 80,
       languageCode: languageCode,
       after: since,
@@ -226,13 +226,25 @@ class _ForYouTabState extends State<ForYouTab> {
       return combined;
     }
 
+    recentPosts = await _rss.fetchPostsPage(
+      perPage: 80,
+      languageCode: languageCode,
+    );
+
+    appendMatchingBucket(primaryCategoryId);
+    appendMatchingBucket(stateCategoryId);
+    appendMatchingBucket(countryCategoryId);
+
+    if (combined.isNotEmpty) {
+      return combined;
+    }
+
     Future<List<Article>> fetchBucketFallback(int? categoryId) async {
       if (categoryId == null) return const [];
       return _rss.fetchCategoryPosts(
         categoryId: categoryId,
         perPage: 30,
         languageCode: languageCode,
-        after: since,
       );
     }
 
@@ -264,13 +276,16 @@ class _ForYouTabState extends State<ForYouTab> {
         categoryId: internationalCategoryId ?? _worldCategoryId,
         perPage: 20,
         languageCode: languageCode,
-        after: since,
       );
       for (final post in internationalPosts) {
         if (post.id != null && seenIds.add(post.id!)) {
           combined.add(post);
         }
       }
+    }
+
+    if (combined.isEmpty) {
+      return recentPosts.take(30).toList();
     }
 
     return combined;
