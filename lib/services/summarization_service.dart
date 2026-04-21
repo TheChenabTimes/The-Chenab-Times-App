@@ -14,6 +14,8 @@ class SummarizationService {
 
   static const _summaryEndpoint =
       'https://api.thechenabtimes.com/summarise.php';
+  static const _finalFallbackMessage =
+      'Summary not available at this moment. Please read full article.';
 
   final DatabaseService _db = DatabaseService();
 
@@ -23,6 +25,7 @@ class SummarizationService {
     String? excerpt,
   }) async {
     final rawText = text.trim();
+    final cleanExcerpt = _excerptFallback(excerpt);
 
     if (rawText.isEmpty &&
         (articleLink == null || articleLink.trim().isEmpty)) {
@@ -32,11 +35,11 @@ class SummarizationService {
     if (articleLink != null) {
       final cached = await _db.getCachedSummary(articleLink);
 
-      if (cached != null &&
-          cached.trim().isNotEmpty &&
-          !cached.contains('Summary not available')) {
-        return cached;
+      if (_isUsableSummary(cached, excerpt: cleanExcerpt)) {
+        return _normalizeText(cached!);
       }
+
+      debugPrint('Ignoring invalid cached summary for $articleLink');
     }
 
     final articleText = _prepareArticleText(rawText);
@@ -50,7 +53,7 @@ class SummarizationService {
           .post(
             Uri.parse(_summaryEndpoint),
             headers: const {'Content-Type': 'application/json'},
-            body: jsonEncode({'article': articleText}),
+            body: jsonEncode({'article': articleText, 'text': articleText}),
           )
           .timeout(const Duration(seconds: 20));
 
@@ -58,23 +61,17 @@ class SummarizationService {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(utf8.decode(response.bodyBytes));
-
-        summary = data['summary']?.toString().trim();
-
-        if (summary != null && summary.length < 40) {
-          summary = null;
-        }
+        summary = _extractValidApiSummary(data['summary']?.toString());
       }
     } catch (e) {
       debugPrint('Summarizer error: $e');
     }
 
-    summary ??= _excerptFallback(excerpt);
+    summary ??= cleanExcerpt;
     summary ??= _finalFallback();
 
     if (articleLink != null &&
-        summary.isNotEmpty &&
-        summary != _finalFallback()) {
+        _shouldCacheSummary(summary, excerpt: cleanExcerpt)) {
       await _db.cacheSummary(articleLink, summary);
     }
 
@@ -82,9 +79,9 @@ class SummarizationService {
   }
 
   String _prepareArticleText(String text) {
-    final cleanText = HtmlHelper.stripAndUnescape(
-      text,
-    ).replaceAll(RegExp(r'\s+'), ' ').trim();
+    final cleanText = _normalizeText(text);
+
+    if (cleanText.isEmpty) return cleanText;
 
     if (cleanText.length <= 2500) return cleanText;
 
@@ -92,18 +89,116 @@ class SummarizationService {
   }
 
   String? _excerptFallback(String? excerpt) {
-    if (excerpt == null) return null;
-
-    final cleanExcerpt = HtmlHelper.stripAndUnescape(
-      excerpt,
-    ).replaceAll(RegExp(r'\s+'), ' ').trim();
+    final cleanExcerpt = _normalizeText(excerpt);
 
     if (cleanExcerpt.length < 30) return null;
+    if (_looksLikeBrokenSummary(cleanExcerpt)) return null;
 
     return cleanExcerpt;
   }
 
+  String _normalizeText(String? value) {
+    return HtmlHelper.stripAndUnescape(
+      value,
+    ).replaceAll(RegExp(r'\s+'), ' ').trim();
+  }
+
+  String? _extractValidApiSummary(String? value) {
+    final normalized = _normalizeText(value);
+    if (normalized.isEmpty) return null;
+    if (_looksLikeBrokenSummary(normalized)) return null;
+
+    final sentenceCount = _sentenceCount(normalized);
+    final wordCount = _wordCount(normalized);
+
+    if (sentenceCount < 2 || sentenceCount > 4) {
+      return null;
+    }
+
+    if (wordCount < 25 || wordCount > 140) {
+      return null;
+    }
+
+    return normalized;
+  }
+
+  bool _isUsableSummary(String? value, {String? excerpt}) {
+    if (value == null) return false;
+    final normalized = _normalizeText(value);
+    if (normalized.isEmpty || normalized == _finalFallbackMessage) {
+      return false;
+    }
+
+    if (_extractValidApiSummary(normalized) != null) {
+      return true;
+    }
+
+    if (excerpt != null && normalized == excerpt) {
+      return true;
+    }
+
+    return false;
+  }
+
+  bool _shouldCacheSummary(String value, {String? excerpt}) {
+    final normalized = _normalizeText(value);
+    if (normalized.isEmpty || normalized == _finalFallbackMessage) {
+      return false;
+    }
+
+    if (_extractValidApiSummary(normalized) != null) {
+      return true;
+    }
+
+    return excerpt != null && normalized == excerpt;
+  }
+
+  bool _looksLikeBrokenSummary(String value) {
+    final normalized = _normalizeText(value);
+    if (normalized.isEmpty) return true;
+
+    final wordCount = _wordCount(normalized);
+    if (wordCount > 150 || normalized.length > 900) {
+      return true;
+    }
+
+    if (_sentenceCount(normalized) <= 1 &&
+        wordCount > 45 &&
+        !_endsLikeSentence(normalized)) {
+      return true;
+    }
+
+    return false;
+  }
+
+  int _wordCount(String value) {
+    if (value.trim().isEmpty) return 0;
+    return value.trim().split(RegExp(r'\s+')).length;
+  }
+
+  int _sentenceCount(String value) {
+    final matches = RegExp(r'[.!?]+').allMatches(value);
+    return matches.length;
+  }
+
+  bool _endsLikeSentence(String value) {
+    final trimmed = value.trimRight();
+    if (trimmed.isEmpty) return false;
+
+    const closingChars = ['"', "'", ')', ']'];
+    var index = trimmed.length - 1;
+
+    while (index >= 0 && closingChars.contains(trimmed[index])) {
+      index--;
+    }
+
+    if (index < 0) return false;
+
+    final lastChar = trimmed[index];
+    return lastChar == '.' || lastChar == '!' || lastChar == '?';
+  }
+
   String _finalFallback() {
-    return 'Summary not available at this moment. Please read full article.';
+    return _finalFallbackMessage;
   }
 }
