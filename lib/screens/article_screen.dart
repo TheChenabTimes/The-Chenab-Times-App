@@ -202,20 +202,117 @@ class _ArticleScreenState extends State<ArticleScreen> {
                     }
 
                     final clamped = delta.clamp(-1.0, 1.0);
-                    final rotation = clamped * 0.14;
-                    final scale = 1 - (clamped.abs() * 0.06);
-                    final translateX = clamped * 34;
+                    final progress = clamped.abs();
+                    final isIncomingFromRight = clamped > 0;
+                    final rotation = clamped * 0.32;
+                    final scale = 1 - (progress * 0.08);
+                    final translateX = clamped * 54;
+                    final lift = progress * 8;
+                    final paperShadowOpacity = (0.26 * progress).clamp(
+                      0.0,
+                      0.26,
+                    );
+                    final edgeHighlightOpacity = (0.18 * progress).clamp(
+                      0.0,
+                      0.18,
+                    );
 
                     return Transform(
                       alignment: clamped >= 0
                           ? Alignment.centerLeft
                           : Alignment.centerRight,
                       transform: Matrix4.identity()
-                        ..setEntry(3, 2, 0.0012)
-                        ..translateByDouble(translateX, 0, 0, 1)
+                        ..setEntry(3, 2, 0.0016)
+                        ..translateByDouble(translateX, -lift, 0, 1)
                         ..rotateY(rotation)
                         ..scaleByDouble(scale, 1.0, 1.0, 1.0),
-                      child: child,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(26),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(
+                                0xFF2D120D,
+                              ).withValues(alpha: paperShadowOpacity),
+                              blurRadius: 22 + (progress * 10),
+                              offset: Offset(
+                                isIncomingFromRight ? -10 : 10,
+                                12,
+                              ),
+                            ),
+                          ],
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(26),
+                          child: Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              Positioned.fill(child: child!),
+                              IgnorePointer(
+                                child: DecoratedBox(
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      begin: isIncomingFromRight
+                                          ? Alignment.centerLeft
+                                          : Alignment.centerRight,
+                                      end: isIncomingFromRight
+                                          ? Alignment.centerRight
+                                          : Alignment.centerLeft,
+                                      colors: [
+                                        const Color(0xFFF7E6CC).withValues(
+                                          alpha: edgeHighlightOpacity,
+                                        ),
+                                        const Color(
+                                          0xFF8C1D18,
+                                        ).withValues(alpha: 0),
+                                        const Color(0xFF1D100B).withValues(
+                                          alpha: (progress * 0.12).clamp(
+                                            0.0,
+                                            0.12,
+                                          ),
+                                        ),
+                                      ],
+                                      stops: const [0.0, 0.45, 1.0],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              if (progress > 0.02)
+                                IgnorePointer(
+                                  child: Align(
+                                    alignment: isIncomingFromRight
+                                        ? Alignment.centerLeft
+                                        : Alignment.centerRight,
+                                    child: Container(
+                                      width: 10 + (progress * 12),
+                                      decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                          begin: isIncomingFromRight
+                                              ? Alignment.centerLeft
+                                              : Alignment.centerRight,
+                                          end: isIncomingFromRight
+                                              ? Alignment.centerRight
+                                              : Alignment.centerLeft,
+                                          colors: [
+                                            const Color(0xFFFFF8ED).withValues(
+                                              alpha: (progress * 0.8).clamp(
+                                                0.0,
+                                                0.8,
+                                              ),
+                                            ),
+                                            const Color(
+                                              0xFFBA9A73,
+                                            ).withValues(alpha: 0),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ),
                     );
                   },
                   child: _ArticlePage(
