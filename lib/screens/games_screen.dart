@@ -28,6 +28,7 @@ class _GamesScreenState extends State<GamesScreen> with WidgetsBindingObserver {
   static const _bestSyncedStreakKey = 'games_best_synced_streak';
   static const _bestLocalScrambleStreakKey = 'games_best_local_scramble_streak';
   static const _syncedTotalPointsKey = 'games_synced_total_points';
+  static const _localPointsSnapshotKey = 'games_local_points_snapshot';
 
   final Random _random = Random();
 
@@ -50,6 +51,7 @@ class _GamesScreenState extends State<GamesScreen> with WidgetsBindingObserver {
   int _bestSyncedStreak = 0;
   int _bestLocalScrambleStreak = 0;
   int _syncedTotalPoints = 0;
+  int _localPointsSnapshot = 0;
   int _sessionBestStreak = 0;
   final List<int> _recentVocabIndexes = [];
   bool _loading = true;
@@ -115,11 +117,12 @@ class _GamesScreenState extends State<GamesScreen> with WidgetsBindingObserver {
     _bestSyncedStreak = prefs.getInt(_bestSyncedStreakKey) ?? 0;
     _bestLocalScrambleStreak = prefs.getInt(_bestLocalScrambleStreakKey) ?? 0;
     _syncedTotalPoints = prefs.getInt(_syncedTotalPointsKey) ?? 0;
+    _localPointsSnapshot = prefs.getInt(_localPointsSnapshotKey) ?? 0;
     _sessionBestStreak = max(_scrambleStreak, _bestLocalScrambleStreak);
     _gameSyncPending =
         _scrambleStreak > _bestSyncedStreak ||
         _bestLocalScrambleStreak > _bestSyncedStreak ||
-        _currentRawTotalPoints() > _syncedTotalPoints;
+        _unsyncedLocalPoints() > 0;
 
     _scramblePuzzle = _nextScramblePuzzle();
     _vocabQuestion = _nextVocabQuestion();
@@ -155,6 +158,7 @@ class _GamesScreenState extends State<GamesScreen> with WidgetsBindingObserver {
     await prefs.setInt(_bestSyncedStreakKey, _bestSyncedStreak);
     await prefs.setInt(_bestLocalScrambleStreakKey, _bestLocalScrambleStreak);
     await prefs.setInt(_syncedTotalPointsKey, _syncedTotalPoints);
+    await prefs.setInt(_localPointsSnapshotKey, _localPointsSnapshot);
   }
 
   int _currentRawTotalPoints() {
@@ -163,6 +167,10 @@ class _GamesScreenState extends State<GamesScreen> with WidgetsBindingObserver {
         _sentenceScore +
         _spellingScore +
         _crosswordScore;
+  }
+
+  int _unsyncedLocalPoints() {
+    return max(0, _currentRawTotalPoints() - _localPointsSnapshot);
   }
 
   int _nextDifferentIndex(int length, int lastIndex) {
@@ -247,7 +255,7 @@ class _GamesScreenState extends State<GamesScreen> with WidgetsBindingObserver {
     final authService = context.watch<AuthService>();
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final totalPoints = max(_currentRawTotalPoints(), _syncedTotalPoints);
+    final totalPoints = _syncedTotalPoints + _unsyncedLocalPoints();
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
@@ -792,7 +800,7 @@ class _GamesScreenState extends State<GamesScreen> with WidgetsBindingObserver {
         );
         _gameSyncPending =
             _sessionBestStreak > _bestSyncedStreak ||
-            _currentRawTotalPoints() > _syncedTotalPoints;
+            _unsyncedLocalPoints() > 0;
         _scramblePuzzle = _nextScramblePuzzle();
         _scrambleController.clear();
       });
@@ -808,7 +816,7 @@ class _GamesScreenState extends State<GamesScreen> with WidgetsBindingObserver {
       );
       _gameSyncPending =
           _bestLocalScrambleStreak > _bestSyncedStreak ||
-          _currentRawTotalPoints() > _syncedTotalPoints;
+          _unsyncedLocalPoints() > 0;
       _showFeedback(
         'Try again. Hint: ${_scramblePuzzle.hint}',
         isSuccess: false,
@@ -830,7 +838,7 @@ class _GamesScreenState extends State<GamesScreen> with WidgetsBindingObserver {
       );
     }
     setState(() => _vocabQuestion = _nextVocabQuestion());
-    _gameSyncPending = _currentRawTotalPoints() > _syncedTotalPoints;
+    _gameSyncPending = _unsyncedLocalPoints() > 0;
     _saveProgress().then((_) => _flushGameSync());
   }
 
@@ -846,7 +854,7 @@ class _GamesScreenState extends State<GamesScreen> with WidgetsBindingObserver {
       );
     }
     setState(() => _sentenceChallenge = _nextSentenceChallenge());
-    _gameSyncPending = _currentRawTotalPoints() > _syncedTotalPoints;
+    _gameSyncPending = _unsyncedLocalPoints() > 0;
     _saveProgress().then((_) => _flushGameSync());
   }
 
@@ -862,7 +870,7 @@ class _GamesScreenState extends State<GamesScreen> with WidgetsBindingObserver {
       );
     }
     setState(() => _spellingBeeQuestion = _nextSpellingBeeQuestion());
-    _gameSyncPending = _currentRawTotalPoints() > _syncedTotalPoints;
+    _gameSyncPending = _unsyncedLocalPoints() > 0;
     _saveProgress().then((_) => _flushGameSync());
   }
 
@@ -881,7 +889,7 @@ class _GamesScreenState extends State<GamesScreen> with WidgetsBindingObserver {
         isSuccess: false,
       );
     }
-    _gameSyncPending = _currentRawTotalPoints() > _syncedTotalPoints;
+    _gameSyncPending = _unsyncedLocalPoints() > 0;
     _saveProgress().then((_) => _flushGameSync());
   }
 
@@ -1316,9 +1324,9 @@ class _GamesScreenState extends State<GamesScreen> with WidgetsBindingObserver {
       _sessionBestStreak,
       _scrambleStreak,
     ].reduce((a, b) => a > b ? a : b);
-    final totalPointsToSync = max(_currentRawTotalPoints(), _syncedTotalPoints);
+    final totalPointsToSync = _syncedTotalPoints + _unsyncedLocalPoints();
     final hasNewStreak = streakToSync > _bestSyncedStreak;
-    final hasNewPoints = totalPointsToSync > _syncedTotalPoints;
+    final hasNewPoints = _unsyncedLocalPoints() > 0;
     if (!authService.isAuthenticated || (!hasNewStreak && !hasNewPoints)) {
       return;
     }
@@ -1327,11 +1335,12 @@ class _GamesScreenState extends State<GamesScreen> with WidgetsBindingObserver {
     try {
       await authService.syncGameProgress(
         bestStreak: streakToSync,
-        totalPoints: totalPointsToSync,
+        totalPoints: _currentRawTotalPoints(),
       );
       _bestSyncedStreak = max(_bestSyncedStreak, streakToSync);
       _bestLocalScrambleStreak = max(_bestLocalScrambleStreak, streakToSync);
-      _syncedTotalPoints = max(_syncedTotalPoints, totalPointsToSync);
+      _syncedTotalPoints = totalPointsToSync;
+      _localPointsSnapshot = _currentRawTotalPoints();
       _gameSyncPending = false;
       await _saveProgress();
     } catch (_) {

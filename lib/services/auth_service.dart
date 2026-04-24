@@ -107,6 +107,7 @@ class AuthService extends ChangeNotifier {
   static const String _bestSyncedStreakKey = 'games_best_synced_streak';
   static const String _bestLocalStreakKey = 'games_best_local_scramble_streak';
   static const String _syncedTotalPointsKey = 'games_synced_total_points';
+  static const String _localPointsSnapshotKey = 'games_local_points_snapshot';
   static const String _scrambleStreakKey = 'games_scramble_streak';
   static const String _vocabScoreKey = 'games_vocab_score';
   static const String _sentenceScoreKey = 'games_sentence_score';
@@ -307,6 +308,11 @@ class AuthService extends ChangeNotifier {
       _readLocalTotalPoints(prefs),
       totalPoints,
     );
+    final localPointsSnapshot = prefs.getInt(_localPointsSnapshotKey) ?? 0;
+    final unsyncedLocalPoints = math.max(
+      0,
+      localTotalPoints - localPointsSnapshot,
+    );
     final knownServerStreak = math.max(
       _serverBestStreakHint,
       _currentUser?.bestStreak ?? 0,
@@ -322,17 +328,16 @@ class AuthService extends ChangeNotifier {
       bestSyncedStreak,
       knownServerStreak,
     ].reduce(math.max);
-    final mergedTotalPoints = [
-      totalPoints,
-      localTotalPoints,
-      syncedTotalPoints,
-      knownServerTotalPoints,
-    ].reduce(math.max);
+    final mergedTotalPoints = math.max(
+      math.max(syncedTotalPoints, knownServerTotalPoints) + unsyncedLocalPoints,
+      math.max(totalPoints, knownServerTotalPoints),
+    );
 
     await _persistMergedGameProgress(
       prefs,
       mergedStreak: mergedStreak,
       mergedTotalPoints: mergedTotalPoints,
+      localPointsSnapshot: localTotalPoints,
     );
     await _authorizedPost(
       '/streak/update.php',
@@ -361,6 +366,7 @@ class AuthService extends ChangeNotifier {
     final bestLocalStreak = prefs.getInt(_bestLocalStreakKey) ?? 0;
     final localTotalPoints = _readLocalTotalPoints(prefs);
     final syncedTotalPoints = prefs.getInt(_syncedTotalPointsKey) ?? 0;
+    final localPointsSnapshot = prefs.getInt(_localPointsSnapshotKey) ?? 0;
     final serverBestStreak = math.max(
       _serverBestStreakHint,
       _currentUser?.bestStreak ?? 0,
@@ -373,21 +379,26 @@ class AuthService extends ChangeNotifier {
       math.max(localStreak, bestLocalStreak),
       serverBestStreak,
     );
+    final unsyncedLocalPoints = math.max(
+      0,
+      localTotalPoints - localPointsSnapshot,
+    );
     final mergedTotalPoints = math.max(
-      math.max(localTotalPoints, syncedTotalPoints),
-      serverTotalPoints,
+      serverTotalPoints + unsyncedLocalPoints,
+      syncedTotalPoints,
     );
 
     await _persistMergedGameProgress(
       prefs,
       mergedStreak: mergedStreak,
       mergedTotalPoints: mergedTotalPoints,
+      localPointsSnapshot: localTotalPoints,
     );
 
     if (mergedStreak > 0 || mergedTotalPoints > 0) {
       await syncGameProgress(
         bestStreak: mergedStreak,
-        totalPoints: mergedTotalPoints,
+        totalPoints: localTotalPoints,
       );
     } else {
       _streakSyncVersion++;
@@ -534,11 +545,13 @@ class AuthService extends ChangeNotifier {
     SharedPreferences prefs, {
     required int mergedStreak,
     required int mergedTotalPoints,
+    required int localPointsSnapshot,
   }) async {
     await prefs.setInt(_scrambleStreakKey, mergedStreak);
     await prefs.setInt(_bestLocalStreakKey, mergedStreak);
     await prefs.setInt(_bestSyncedStreakKey, mergedStreak);
     await prefs.setInt(_syncedTotalPointsKey, mergedTotalPoints);
+    await prefs.setInt(_localPointsSnapshotKey, localPointsSnapshot);
   }
 
   int _readLocalTotalPoints(SharedPreferences prefs) {
