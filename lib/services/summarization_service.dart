@@ -89,7 +89,7 @@ class SummarizationService {
   }
 
   String? _excerptFallback(String? excerpt) {
-    final cleanExcerpt = _normalizeText(excerpt);
+    final cleanExcerpt = _polishSummary(excerpt) ?? _normalizeText(excerpt);
 
     if (cleanExcerpt.length < 30) return null;
     if (_looksLikeBrokenSummary(cleanExcerpt)) return null;
@@ -104,8 +104,8 @@ class SummarizationService {
   }
 
   String? _extractValidApiSummary(String? value) {
-    final normalized = _normalizeText(value);
-    if (normalized.isEmpty) return null;
+    final normalized = _polishSummary(value);
+    if (normalized == null || normalized.isEmpty) return null;
     if (_looksLikeBrokenSummary(normalized)) return null;
 
     final sentenceCount = _sentenceCount(normalized);
@@ -120,6 +120,43 @@ class SummarizationService {
     }
 
     return normalized;
+  }
+
+  String? _polishSummary(String? value) {
+    final normalized = _normalizeText(value);
+    if (normalized.isEmpty) return null;
+
+    var polished = normalized
+        .replaceAll(
+          RegExp(r'^\s*(summary|ai summary)\s*:\s*', caseSensitive: false),
+          '',
+        )
+        .replaceAll(
+          RegExp(
+            r'\b(this|the) article (discusses|highlights|explores)\b',
+            caseSensitive: false,
+          ),
+          'The report highlights',
+        )
+        .replaceAll(RegExp(r'\bin conclusion[, ]*', caseSensitive: false), '')
+        .trim();
+
+    final sentenceMatches = RegExp(r'[^.!?]+[.!?]+').allMatches(polished);
+    final completeSentences = sentenceMatches
+        .map((match) => match.group(0)!.trim())
+        .where((sentence) => _wordCount(sentence) >= 4)
+        .take(3)
+        .toList();
+
+    if (completeSentences.isNotEmpty) {
+      polished = completeSentences.join(' ');
+    }
+
+    if (!_endsLikeSentence(polished)) {
+      return null;
+    }
+
+    return polished;
   }
 
   bool _isUsableSummary(String? value, {String? excerpt}) {

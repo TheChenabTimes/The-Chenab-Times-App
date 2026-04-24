@@ -148,6 +148,7 @@ class _ArticleScreenState extends State<ArticleScreen> {
     final title = HtmlHelper.stripAndUnescape(article.title ?? '').trim();
     final cleanSummary = HtmlHelper.stripAndUnescape(summary ?? '').trim();
     final imageUrl = (article.imageUrl ?? article.thumbnailUrl ?? '').trim();
+    final hasImage = imageUrl.isNotEmpty;
     final byline = [
       if ((article.author ?? '').trim().isNotEmpty) article.author!.trim(),
       if (article.date != null) DateFormat.yMMMMd().format(article.date!),
@@ -183,212 +184,199 @@ class _ArticleScreenState extends State<ArticleScreen> {
                   ],
                 ),
               ),
-              Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Column(
+              if (hasImage)
+                SizedBox(
+                  width: double.infinity,
+                  height: 250,
+                  child: Stack(
+                    fit: StackFit.expand,
                     children: [
-                      if (imageUrl.isNotEmpty)
-                        SizedBox(
-                          width: double.infinity,
-                          height: 250,
-                          child: Stack(
-                            fit: StackFit.expand,
-                            children: [
-                              Image.network(
-                                imageUrl,
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) =>
-                                    Container(color: const Color(0xFFE1D2BE)),
-                              ),
-                              const DecoratedBox(
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    begin: Alignment.topCenter,
-                                    end: Alignment.bottomCenter,
-                                    colors: [
-                                      Color(0x10000000),
-                                      Color(0xAA000000),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              Positioned(
-                                left: 14,
-                                right: 14,
-                                bottom: 14,
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 8,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: Colors.black.withValues(alpha: 0.45),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: const Text(
-                                    'Quick summary crafted for fast reading',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
+                      Image.network(
+                        imageUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) =>
+                            Container(color: const Color(0xFFE1D2BE)),
+                      ),
+                      const DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [Color(0x10000000), Color(0xAA000000)],
                           ),
-                        )
-                      else
-                        Container(
-                          width: double.infinity,
-                          height: 170,
-                          color: const Color(0xFFE7D8C5),
                         ),
-                      const SizedBox(height: 320),
+                      ),
+                      Positioned(
+                        left: 14,
+                        right: 14,
+                        bottom: 14,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withValues(alpha: 0.45),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Text(
+                            'Quick summary crafted for fast reading',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
-                  Positioned(
-                    left: 10,
-                    right: 10,
-                    top: imageUrl.isNotEmpty ? 180 : 90,
-                    child: Container(
-                      padding: const EdgeInsets.fromLTRB(18, 16, 18, 18),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFBF4EA),
-                        borderRadius: BorderRadius.circular(22),
-                        border: Border.all(color: const Color(0xFFE8D8C8)),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Color(0x22000000),
-                            blurRadius: 18,
-                            offset: Offset(0, 8),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              const Icon(
-                                Icons.bolt_rounded,
-                                color: Color(0xFF7D1A17),
-                                size: 22,
-                              ),
-                              const SizedBox(width: 8),
-                              const Expanded(
-                                child: Text(
-                                  'READ IN SHORT',
-                                  style: TextStyle(
-                                    color: Color(0xFF442218),
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w900,
-                                    letterSpacing: 0.6,
-                                  ),
-                                ),
-                              ),
-                              IconButton(
-                                onPressed: _toggleSaved,
-                                splashRadius: 22,
-                                padding: EdgeInsets.zero,
-                                constraints: const BoxConstraints(),
-                                icon: Icon(
-                                  isSaved
-                                      ? Icons.bookmark_rounded
-                                      : Icons.bookmark_border_rounded,
-                                  color: const Color(0xFF4A392E),
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              IconButton(
-                                onPressed: _shareArticle,
-                                splashRadius: 22,
-                                padding: EdgeInsets.zero,
-                                constraints: const BoxConstraints(),
-                                icon: const Icon(
-                                  Icons.share_outlined,
-                                  color: Color(0xFF4A392E),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 10),
-                          if (byline.isNotEmpty)
-                            Text(
-                              byline,
-                              style: const TextStyle(
-                                color: Color(0xFF6B5949),
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                              ),
+                )
+              else
+                Container(
+                  width: double.infinity,
+                  height: 170,
+                  color: const Color(0xFFE7D8C5),
+                ),
+              Transform.translate(
+                offset: Offset(0, hasImage ? -70 : -40),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: Container(
+                    padding: const EdgeInsets.fromLTRB(18, 16, 18, 18),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFBF4EA),
+                      borderRadius: BorderRadius.circular(22),
+                      border: Border.all(color: const Color(0xFFE8D8C8)),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Color(0x22000000),
+                          blurRadius: 18,
+                          offset: Offset(0, 8),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(
+                              Icons.bolt_rounded,
+                              color: Color(0xFF7D1A17),
+                              size: 22,
                             ),
-                          const SizedBox(height: 12),
-                          Text(
-                            title,
-                            style: const TextStyle(
-                              color: Color(0xFF5A1E1A),
-                              fontSize: 22,
-                              height: 1.18,
-                              fontWeight: FontWeight.w900,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          if (loading)
-                            const Padding(
-                              padding: EdgeInsets.symmetric(vertical: 18),
-                              child: Center(child: CircularProgressIndicator()),
-                            )
-                          else
-                            Text(
-                              cleanSummary.isNotEmpty
-                                  ? cleanSummary
-                                  : 'Summary not available at this moment. Please read full article.',
-                              style: const TextStyle(
-                                color: Color(0xFF2E241E),
-                                fontSize: 17,
-                                height: 1.55,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          const SizedBox(height: 22),
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton(
-                              onPressed: _openingFullArticle
-                                  ? null
-                                  : _openFullArticle,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF9E1E1B),
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 16,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(30),
-                                ),
-                                elevation: 7,
-                                shadowColor: const Color(
-                                  0xFF9E1E1B,
-                                ).withValues(alpha: 0.35),
-                              ),
+                            const SizedBox(width: 8),
+                            const Expanded(
                               child: Text(
-                                _openingFullArticle
-                                    ? 'Opening...'
-                                    : 'Read Full Article',
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w800,
+                                'READ IN SHORT',
+                                style: TextStyle(
+                                  color: Color(0xFF442218),
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: 0.6,
                                 ),
                               ),
                             ),
+                            IconButton(
+                              onPressed: _toggleSaved,
+                              splashRadius: 22,
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                              icon: Icon(
+                                isSaved
+                                    ? Icons.bookmark_rounded
+                                    : Icons.bookmark_border_rounded,
+                                color: const Color(0xFF4A392E),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            IconButton(
+                              onPressed: _shareArticle,
+                              splashRadius: 22,
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                              icon: const Icon(
+                                Icons.share_outlined,
+                                color: Color(0xFF4A392E),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        if (byline.isNotEmpty)
+                          Text(
+                            byline,
+                            style: const TextStyle(
+                              color: Color(0xFF6B5949),
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
-                        ],
-                      ),
+                        const SizedBox(height: 12),
+                        Text(
+                          title,
+                          style: const TextStyle(
+                            color: Color(0xFF5A1E1A),
+                            fontSize: 22,
+                            height: 1.18,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        if (loading)
+                          const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 18),
+                            child: Center(child: CircularProgressIndicator()),
+                          )
+                        else
+                          Text(
+                            cleanSummary.isNotEmpty
+                                ? cleanSummary
+                                : 'Summary not available at this moment. Please read full article.',
+                            style: const TextStyle(
+                              color: Color(0xFF2E241E),
+                              fontSize: 17,
+                              height: 1.55,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        const SizedBox(height: 22),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: _openingFullArticle
+                                ? null
+                                : _openFullArticle,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF9E1E1B),
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(30),
+                              ),
+                              elevation: 7,
+                              shadowColor: const Color(
+                                0xFF9E1E1B,
+                              ).withValues(alpha: 0.35),
+                            ),
+                            child: Text(
+                              _openingFullArticle
+                                  ? 'Opening...'
+                                  : 'Read Full Article',
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ],
+                ),
               ),
+              SizedBox(height: hasImage ? 0 : 12),
             ],
           ),
         ),
