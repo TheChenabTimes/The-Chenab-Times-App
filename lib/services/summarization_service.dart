@@ -144,7 +144,10 @@ class SummarizationService {
     final sentenceMatches = RegExp(r'[^.!?]+[.!?]+').allMatches(polished);
     final completeSentences = sentenceMatches
         .map((match) => match.group(0)!.trim())
-        .where((sentence) => _wordCount(sentence) >= 4)
+        .where(
+          (sentence) =>
+              _wordCount(sentence) >= 4 && !_hasDanglingEnding(sentence),
+        )
         .take(3)
         .toList();
 
@@ -152,7 +155,7 @@ class SummarizationService {
       polished = completeSentences.join(' ');
     }
 
-    if (!_endsLikeSentence(polished)) {
+    if (!_endsLikeSentence(polished) || _hasDanglingEnding(polished)) {
       return null;
     }
 
@@ -205,6 +208,10 @@ class SummarizationService {
       return true;
     }
 
+    if (_hasDanglingEnding(normalized)) {
+      return true;
+    }
+
     return false;
   }
 
@@ -233,6 +240,75 @@ class SummarizationService {
 
     final lastChar = trimmed[index];
     return lastChar == '.' || lastChar == '!' || lastChar == '?';
+  }
+
+  bool _hasDanglingEnding(String value) {
+    final trimmed = value.trim();
+    if (trimmed.isEmpty) return true;
+
+    final lastSentenceMatch = RegExp(
+      r'''([^.!?]+)[.!?]["')\]]*\s*$''',
+    ).firstMatch(trimmed);
+    final sentenceBody =
+        lastSentenceMatch?.group(1)?.trim() ??
+        trimmed.replaceAll(RegExp(r'''[.!?]["')\]]*\s*$'''), '').trim();
+
+    if (sentenceBody.isEmpty) return true;
+
+    final tokens = sentenceBody
+        .split(RegExp(r'\s+'))
+        .where((token) => token.trim().isNotEmpty)
+        .toList();
+    if (tokens.isEmpty) return true;
+
+    final lastWord = tokens.last
+        .replaceAll(RegExp(r'[^a-zA-Z-]'), '')
+        .toLowerCase();
+
+    const danglingEndings = {
+      'and',
+      'or',
+      'but',
+      'so',
+      'because',
+      'if',
+      'than',
+      'that',
+      'which',
+      'who',
+      'whom',
+      'whose',
+      'when',
+      'where',
+      'while',
+      'after',
+      'before',
+      'during',
+      'for',
+      'from',
+      'into',
+      'onto',
+      'over',
+      'under',
+      'through',
+      'toward',
+      'towards',
+      'with',
+      'without',
+      'within',
+      'about',
+      'around',
+      'between',
+      'among',
+      'against',
+      'across',
+      'despite',
+      'via',
+      'per',
+      'to',
+    };
+
+    return lastWord.isEmpty || danglingEndings.contains(lastWord);
   }
 
   String _finalFallback() {
