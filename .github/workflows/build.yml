@@ -52,18 +52,8 @@ jobs:
       - name: Build AAB
         run: flutter build appbundle --release
 
-      - name: Prepare AAB for Hostinger upload
-        run: |
-          mkdir -p release-upload
-          cp build/app/outputs/bundle/release/app-release.aab release-upload/app-release.aab
-
-      - name: Upload AAB to Hostinger
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      - name: Upload AAB
+        uses: actions/upload-artifact@v4
         with:
-          server: ${{ secrets.HOSTINGER_FTP_HOST }}
-          username: ${{ secrets.HOSTINGER_FTP_USERNAME }}
-          password: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
-          port: ${{ secrets.HOSTINGER_FTP_PORT || 21 }}
-          protocol: ftp
-          local-dir: release-upload/
-          server-dir: public_html/downloads/imp/
+          name: release-aab
+          path: build/app/outputs/bundle/release/app-release.aab
