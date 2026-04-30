@@ -30,6 +30,13 @@ jobs:
       - name: Decode Keystore
         run: |
           echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/chenab-times.keystore
+      - name: Verify keystore SHA-256
+        run: |
+          keytool -list -v \
+            -keystore android/app/chenab-times.keystore \
+            -storepass "${{ secrets.KEYSTORE_PASSWORD }}" \
+            -alias "${{ secrets.KEY_ALIAS }}" \
+            -keypass "${{ secrets.KEY_PASSWORD }}" | grep "SHA256:"
       - name: Create key.properties
         run: |
           cat > android/key.properties << 'KEYEOF'
